@@ -1,9 +1,15 @@
 {
-  "schema": "archify.motion-golden.v1",
+  "schema": "archify.motion-golden.v2",
   "source": "examples/async-job-roundtrip.sequence.json",
   "contract": "examples/motion/async-job-roundtrip.motion.json",
   "contractSha256": "65b09d88dc7ec1c573f6fee4c3b03e3035fdba4db9caa81f3ede78cdf0138e58",
   "irSemanticSha256": "9f8ce37b2b4452dfcae5c5513fce960bfd8116dd601265c9af73628981cc6c44",
+  "encoded": {
+    "file": "motion.mkv",
+    "sha256": "5739cb0eb2b2709bc15772ebdf397153b8a4c903d6495a24d5d0603fc911b9b3",
+    "codec": "ffv1-lossless-rgba",
+    "frameRate": 1
+  },
   "captures": [
     {
       "name": "request",
@@ -12,6 +18,7 @@
       "width": 820,
       "height": 920,
       "pngSha256": "8aed2cff5e81717a70cbdd985145e4fde8ea9de5076314a4e12f768564d3ae8b",
+      "projectPixelSha256": "9e56f4934e798078f40646d4e9e7c7fd5720350c33288ed354a5af1fa58f76e1",
       "activeBeatIds": [
         "request"
       ],
@@ -24,7 +31,10 @@
       ],
       "states": [
         "request.submitted"
-      ]
+      ],
+      "encodedFile": "encoded/request.png",
+      "encodedPngSha256": "fd9ef86b9dfdd6fd5b99256dc90377dd357606072855fbd75a1a4ab3d8e08693",
+      "encodedPixelSha256": "9e56f4934e798078f40646d4e9e7c7fd5720350c33288ed354a5af1fa58f76e1"
     },
     {
       "name": "queued",
@@ -33,6 +43,7 @@
       "width": 820,
       "height": 920,
       "pngSha256": "d9e994185a29f9c2c84f48d2d69cb676ceae5e77ad596d0d9389d72c9ebfcbd4",
+      "projectPixelSha256": "ab109a2b9203577e3c0b22806dac10efc6491ebb0faecbe87d24acb3b4b789db",
       "activeBeatIds": [
         "enqueue"
       ],
@@ -45,7 +56,10 @@
       ],
       "states": [
         "job.queued"
-      ]
+      ],
+      "encodedFile": "encoded/queued.png",
+      "encodedPngSha256": "e2b3e7a86abb7ca021a9e3a270489ff7d52ec884ef6ab61af2ab1a24062a0945",
+      "encodedPixelSha256": "ab109a2b9203577e3c0b22806dac10efc6491ebb0faecbe87d24acb3b4b789db"
     },
     {
       "name": "processing",
@@ -54,6 +68,7 @@
       "width": 820,
       "height": 920,
       "pngSha256": "5bbc2fc639e69909e25f05e17081913fe73d6c84143eb1ce036c57554b56229e",
+      "projectPixelSha256": "c8f68f28888da7dee638cc3fe0f5d6ecef481d5f4dc5f30ca1a094327fd8f7c0",
       "activeBeatIds": [
         "perform"
       ],
@@ -66,7 +81,10 @@
       ],
       "states": [
         "job.processing"
-      ]
+      ],
+      "encodedFile": "encoded/processing.png",
+      "encodedPngSha256": "a73dbdb4e6b83479570d9f1745491d2dfe83211284131dd9afdf2e766691841c",
+      "encodedPixelSha256": "c8f68f28888da7dee638cc3fe0f5d6ecef481d5f4dc5f30ca1a094327fd8f7c0"
     },
     {
       "name": "callback",
@@ -75,6 +93,7 @@
       "width": 820,
       "height": 920,
       "pngSha256": "1a0f36775c2c49e2d4f7b65fd46fe6d90863565966cab1c5141fc9526efd884a",
+      "projectPixelSha256": "a88de5f1a3e03402c55a2c4f5ce5e04fde9d6d5a50aca2b7e396a0e6c6fc80b4",
       "activeBeatIds": [
         "callback"
       ],
@@ -87,7 +106,10 @@
       ],
       "states": [
         "notification.delivered"
-      ]
+      ],
+      "encodedFile": "encoded/callback.png",
+      "encodedPngSha256": "103a8713b827ec4fe5538c43aa6949eb1c8ef4d08db520c1fef9fd5c2174431d",
+      "encodedPixelSha256": "a88de5f1a3e03402c55a2c4f5ce5e04fde9d6d5a50aca2b7e396a0e6c6fc80b4"
     },
     {
       "name": "reconciled",
@@ -96,6 +118,7 @@
       "width": 820,
       "height": 920,
       "pngSha256": "e9d443b3ecae345e1d67567b4d33a9aaaadda9ef58093002d443de4b2e18828f",
+      "projectPixelSha256": "9463949aaf3def190e8292744105b8ab1ded31d01bc5c9149b5d74685f30d76d",
       "activeBeatIds": [
         "final"
       ],
@@ -108,7 +131,10 @@
       ],
       "states": [
         "reconcile.converged"
-      ]
+      ],
+      "encodedFile": "encoded/reconciled.png",
+      "encodedPngSha256": "14537f32159a1292b651de34018597d4c466cb9aa44f3b0b3e1adc60f6483417",
+      "encodedPixelSha256": "9463949aaf3def190e8292744105b8ab1ded31d01bc5c9149b5d74685f30d76d"
     }
   ]
 }

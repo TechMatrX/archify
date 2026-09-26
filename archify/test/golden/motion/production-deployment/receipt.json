@@ -1,0 +1,146 @@
+{
+  "schema": "archify.motion-golden.v2",
+  "source": "examples/production-deployment.architecture.json",
+  "contract": "examples/motion/production-deployment.motion.json",
+  "contractSha256": "7161fbd2a20515856417ad5bd7073afa1885d3b202a2331ce1014bd49cdd3763",
+  "irSemanticSha256": "d9bb248ffbe0245355cc1a0a9b51a9a9b2948a20a6c7e8b1e77ee090c818afae",
+  "encoded": {
+    "file": "motion.mkv",
+    "sha256": "e62821620b136219e3b51cf606b41f7c065518aa98f60c3faf21c08bcee3d6cf",
+    "codec": "ffv1-lossless-rgba",
+    "frameRate": 1
+  },
+  "captures": [
+    {
+      "name": "edge",
+      "timeMs": 250,
+      "file": "edge.png",
+      "width": 1376,
+      "height": 728,
+      "pngSha256": "67c23f7f1d70938ba801c85c85b4e990c31604ce75383956d30cbfe5a95be40f",
+      "projectPixelSha256": "1c098249009144c6a2d1b662f5ba1affdf51ad3813688278892a353713c56414",
+      "activeBeatIds": [
+        "request-edge"
+      ],
+      "activeNodeIds": [
+        "clients",
+        "edge"
+      ],
+      "activeRelationshipIds": [
+        "client-edge-https"
+      ],
+      "states": [
+        "request.edge"
+      ],
+      "encodedFile": "encoded/edge.png",
+      "encodedPngSha256": "0f344da2906a1cc1c856165dbcb1994bb5ef21f484498f565e6aa24f52b0cf1c",
+      "encodedPixelSha256": "1c098249009144c6a2d1b662f5ba1affdf51ad3813688278892a353713c56414"
+    },
+    {
+      "name": "api-fanout",
+      "timeMs": 1250,
+      "file": "api-fanout.png",
+      "width": 1376,
+      "height": 728,
+      "pngSha256": "a2fba73edae0b4478f1f3144991266d91d0f658098e61ca28d790a91b3c30cc8",
+      "projectPixelSha256": "77a337923cd6caca1aad7190cf714c7aa71ee3545e3f3b6512d50b2dfc5c2f9f",
+      "activeBeatIds": [
+        "split-apis"
+      ],
+      "activeNodeIds": [
+        "api_a",
+        "api_b",
+        "gateway"
+      ],
+      "activeRelationshipIds": [
+        "gateway-api-a-route",
+        "gateway-api-b-route"
+      ],
+      "states": [
+        "request.dispatched"
+      ],
+      "encodedFile": "encoded/api-fanout.png",
+      "encodedPngSha256": "7080969409db495e17e454b4ea3c4fd4ffe8b40afd633ecdae650b8f6d58e35b",
+      "encodedPixelSha256": "77a337923cd6caca1aad7190cf714c7aa71ee3545e3f3b6512d50b2dfc5c2f9f"
+    },
+    {
+      "name": "async",
+      "timeMs": 2250,
+      "file": "async.png",
+      "width": 1376,
+      "height": 728,
+      "pngSha256": "838f2683e496eb1b43f7e9b2287a89c5a1da0702aba303974ad590a31b6938fb",
+      "projectPixelSha256": "4ad8fbb9d38b50e4b3711ee8807fff0b30fd3ecd0de45a1bd2a84612f87d8999",
+      "activeBeatIds": [
+        "dispatch-async"
+      ],
+      "activeNodeIds": [
+        "api_a",
+        "api_b",
+        "events"
+      ],
+      "activeRelationshipIds": [
+        "api-a-publish",
+        "api-b-publish"
+      ],
+      "states": [
+        "async.published"
+      ],
+      "encodedFile": "encoded/async.png",
+      "encodedPngSha256": "ed340dcb9b066c39129f988fe0fdfe9e5de47dbe22a16e11c988f79930c71740",
+      "encodedPixelSha256": "4ad8fbb9d38b50e4b3711ee8807fff0b30fd3ecd0de45a1bd2a84612f87d8999"
+    },
+    {
+      "name": "replication",
+      "timeMs": 3250,
+      "file": "replication.png",
+      "width": 1376,
+      "height": 728,
+      "pngSha256": "0b08418ca85c89607b15a945332b7c6950def18846a8a0c847b461cc8a3b90a2",
+      "projectPixelSha256": "527d869bc937c9fd3836cb85081102866c155e466613963e272f3d13d8dd7e06",
+      "activeBeatIds": [
+        "replicate-state"
+      ],
+      "activeNodeIds": [
+        "postgres",
+        "replica"
+      ],
+      "activeRelationshipIds": [
+        "postgres-replica-wal"
+      ],
+      "states": [
+        "state.replicated"
+      ],
+      "encodedFile": "encoded/replication.png",
+      "encodedPngSha256": "69e79bcc1bc27fbe8823002c63c2b61e671f808418beb65c0f49c36844bee889",
+      "encodedPixelSha256": "527d869bc937c9fd3836cb85081102866c155e466613963e272f3d13d8dd7e06"
+    },
+    {
+      "name": "evidence",
+      "timeMs": 3750,
+      "file": "evidence.png",
+      "width": 1376,
+      "height": 728,
+      "pngSha256": "760ed765f7891fa128840dc4c0dce7f2725df1657f02e03f5fff36fce054f326",
+      "projectPixelSha256": "60503ec5a231a26940830744d58b4a74a84d2cdb3d30bdea8ec2e02e155bb5da",
+      "activeBeatIds": [
+        "emit-evidence"
+      ],
+      "activeNodeIds": [
+        "audit",
+        "observability",
+        "worker"
+      ],
+      "activeRelationshipIds": [
+        "worker-audit-evidence",
+        "worker-observability-otlp"
+      ],
+      "states": [
+        "evidence.emitted"
+      ],
+      "encodedFile": "encoded/evidence.png",
+      "encodedPngSha256": "102a7864d4792ac24a2300574017944c5b468dbb0fa21ea4316b89c944902aa8",
+      "encodedPixelSha256": "60503ec5a231a26940830744d58b4a74a84d2cdb3d30bdea8ec2e02e155bb5da"
+    }
+  ]
+}

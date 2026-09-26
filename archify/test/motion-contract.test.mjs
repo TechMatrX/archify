@@ -100,6 +100,38 @@ test('checked-in Sequence transit PNGs match their immutable motion receipt', ()
   }
 });
 
+test('five anchor project PNGs and decoded lossless frames retain semantic parity', () => {
+  const anchors = [
+    ['async-job-roundtrip', source, contract],
+    ['release-delivery', workflowSource, workflowContract],
+    ['deployment-release', lifecycleSource, lifecycleContract],
+    ['event-stream', dataflowSource, dataflowContract],
+    ['production-deployment', architectureSource, architectureContract],
+  ];
+  for (const [id, readSource, readContract] of anchors) {
+    const receipt = readJson(`test/golden/motion/${id}/receipt.json`);
+    const timeline = compile(readContract(), readSource());
+    assert.equal(receipt.schema, 'archify.motion-golden.v2');
+    assert.equal(receipt.contractSha256, timeline.receipt.contractSha256);
+    assert.equal(receipt.irSemanticSha256, timeline.receipt.irSemanticSha256);
+    assert.equal(receipt.captures.length, 5);
+    const encoded = fs.readFileSync(path.join(root, `test/golden/motion/${id}`, receipt.encoded.file));
+    assert.equal(crypto.createHash('sha256').update(encoded).digest('hex'), receipt.encoded.sha256);
+    for (const capture of receipt.captures) {
+      const project = fs.readFileSync(path.join(root, `test/golden/motion/${id}`, capture.file));
+      const decoded = fs.readFileSync(path.join(root, `test/golden/motion/${id}`, capture.encodedFile));
+      assert.equal(crypto.createHash('sha256').update(project).digest('hex'), capture.pngSha256);
+      assert.equal(crypto.createHash('sha256').update(decoded).digest('hex'), capture.encodedPngSha256);
+      assert.equal(capture.projectPixelSha256, capture.encodedPixelSha256);
+      const state = timeline.seek(capture.timeMs);
+      assert.deepEqual(state.activeBeatIds, capture.activeBeatIds);
+      assert.deepEqual(state.activeNodeIds, capture.activeNodeIds);
+      assert.deepEqual(state.activeRelationshipIds, capture.activeRelationshipIds);
+      assert.deepEqual(state.states, capture.states);
+    }
+  }
+});
+
 test('pause freezes the inspected deterministic motion state', () => {
   const timeline = compile(contract(), source());
   timeline.seek(4750);

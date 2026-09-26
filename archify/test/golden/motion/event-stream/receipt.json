@@ -1,0 +1,147 @@
+{
+  "schema": "archify.motion-golden.v2",
+  "source": "examples/event-stream.dataflow.json",
+  "contract": "examples/motion/event-stream.motion.json",
+  "contractSha256": "e082bae44634729125b1a610dac77689af553cb8087b7e1729c39605504c260f",
+  "irSemanticSha256": "fada3e56efb937990bfa4ba7fea3b881472f4f5fe43502d029f8dd238079e497",
+  "encoded": {
+    "file": "motion.mkv",
+    "sha256": "92c32738d58ebaf1a663204efe7487852aad00e926a3f9cdd8dba9b8f7bf0a29",
+    "codec": "ffv1-lossless-rgba",
+    "frameRate": 1
+  },
+  "captures": [
+    {
+      "name": "publish",
+      "timeMs": 250,
+      "file": "publish.png",
+      "width": 1080,
+      "height": 780,
+      "pngSha256": "45cb9f7beae4385f2e8b65d26a42bcaae01018d850260257605ab2412444ba1e",
+      "projectPixelSha256": "99930a24078713829aaec03b1766b31608fa4d7903ab1c9133343345b0a71bce",
+      "activeBeatIds": [
+        "publish-events"
+      ],
+      "activeNodeIds": [
+        "billing",
+        "checkout",
+        "orders",
+        "payments"
+      ],
+      "activeRelationshipIds": [
+        "billing-payments",
+        "checkout-orders"
+      ],
+      "states": [
+        "events.published"
+      ],
+      "encodedFile": "encoded/publish.png",
+      "encodedPngSha256": "cc752dfa9ee3dad6e12fcc2b9c9e78af2fd16e385c6cf6152334fee3598005ea",
+      "encodedPixelSha256": "99930a24078713829aaec03b1766b31608fa4d7903ab1c9133343345b0a71bce"
+    },
+    {
+      "name": "fanin",
+      "timeMs": 1250,
+      "file": "fanin.png",
+      "width": 1080,
+      "height": 780,
+      "pngSha256": "16ddda17d05fce5ac1e12f7b0759045f50a91684d19d9cbb980c504868d17106",
+      "projectPixelSha256": "34724cea8c59b435eed15eca866fe857f8d9e684912c27d6871feda6444ddeac",
+      "activeBeatIds": [
+        "converge-state"
+      ],
+      "activeNodeIds": [
+        "enrich",
+        "state",
+        "validate"
+      ],
+      "activeRelationshipIds": [
+        "enrich-state",
+        "validate-state"
+      ],
+      "states": [
+        "state.materialized"
+      ],
+      "encodedFile": "encoded/fanin.png",
+      "encodedPngSha256": "ffddb6e898ed416770ad7b233fdd604e90298f3dc89e0f3e7cc5f36d3f3fcead",
+      "encodedPixelSha256": "34724cea8c59b435eed15eca866fe857f8d9e684912c27d6871feda6444ddeac"
+    },
+    {
+      "name": "consumer-fanout",
+      "timeMs": 1750,
+      "file": "consumer-fanout.png",
+      "width": 1080,
+      "height": 780,
+      "pngSha256": "a7731b678e71cb1d0c52d56702e3c9191acc8017d776db493b84bc5d569cee39",
+      "projectPixelSha256": "ea9ec0021b78988f404115a1715d5115f266aa17332481cc70e9911ddf1b7ef5",
+      "activeBeatIds": [
+        "serve-consumers"
+      ],
+      "activeNodeIds": [
+        "analytics",
+        "fulfillment",
+        "state"
+      ],
+      "activeRelationshipIds": [
+        "state-analytics",
+        "state-fulfillment"
+      ],
+      "states": [
+        "consumers.served"
+      ],
+      "encodedFile": "encoded/consumer-fanout.png",
+      "encodedPngSha256": "e634eddf0fbf0895630099c7183aabce5c3d4f89f74f8bb4bae3eb77261ad5e6",
+      "encodedPixelSha256": "ea9ec0021b78988f404115a1715d5115f266aa17332481cc70e9911ddf1b7ef5"
+    },
+    {
+      "name": "restricted-review",
+      "timeMs": 2750,
+      "file": "restricted-review.png",
+      "width": 1080,
+      "height": 780,
+      "pngSha256": "b267365f9d4818a23900cdcbb7f8131bf7f4ec10f9e6ced3eacce0fd5f35d03a",
+      "projectPixelSha256": "e67960d5a2025a25bb67a95aeeb8baa611735e540ec687dfad04f783ea4be840",
+      "activeBeatIds": [
+        "inspect-restricted"
+      ],
+      "activeNodeIds": [
+        "dlq",
+        "ops"
+      ],
+      "activeRelationshipIds": [
+        "dlq-ops"
+      ],
+      "states": [
+        "failures.restricted_review"
+      ],
+      "encodedFile": "encoded/restricted-review.png",
+      "encodedPngSha256": "dd4bd33b4fe53ea629d599ddb51f42c0c48422a2711e06e2f2ef99ad958dd25a",
+      "encodedPixelSha256": "e67960d5a2025a25bb67a95aeeb8baa611735e540ec687dfad04f783ea4be840"
+    },
+    {
+      "name": "replay",
+      "timeMs": 3750,
+      "file": "replay.png",
+      "width": 1080,
+      "height": 780,
+      "pngSha256": "f8ca5009c23324fc8c17b27070ee91642b3eb8c88c7aefdcd517905f82932755",
+      "projectPixelSha256": "32493d8f3f3f3779f1a0971b44143b12e54b462f2e0aefacc7963f80e61aa0b9",
+      "activeBeatIds": [
+        "replay-batch"
+      ],
+      "activeNodeIds": [
+        "dlq",
+        "replay"
+      ],
+      "activeRelationshipIds": [
+        "dlq-replay"
+      ],
+      "states": [
+        "replay.executed"
+      ],
+      "encodedFile": "encoded/replay.png",
+      "encodedPngSha256": "6e31f5ff0076b3e4cad83700ec850e673c23aa3eeb3cd022865f1ea660d936e9",
+      "encodedPixelSha256": "32493d8f3f3f3779f1a0971b44143b12e54b462f2e0aefacc7963f80e61aa0b9"
+    }
+  ]
+}

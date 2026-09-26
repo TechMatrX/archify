@@ -1,0 +1,140 @@
+{
+  "schema": "archify.motion-golden.v2",
+  "source": "examples/release-delivery.workflow.json",
+  "contract": "examples/motion/release-delivery.motion.json",
+  "contractSha256": "3c644b5981f8500cd40544a86da1bcb93a13c95d81fec097d461c6d66d4b877e",
+  "irSemanticSha256": "07003733f86f2161275f0b5025df714dd846a644ad3366c563df6d5f48720408",
+  "encoded": {
+    "file": "motion.mkv",
+    "sha256": "6c2569aa3965346e48e407c33c0b23f1f5ea0cb6e6b3fa6f27b8e60809953644",
+    "codec": "ffv1-lossless-rgba",
+    "frameRate": 1
+  },
+  "captures": [
+    {
+      "name": "commit",
+      "timeMs": 250,
+      "file": "commit.png",
+      "width": 720,
+      "height": 900,
+      "pngSha256": "dbbe4ed6bffd4a6ec2cc84dbb05a7dec36df2cf0c0a76e371dc5bfa9e0292350",
+      "projectPixelSha256": "4c1ef34e1875fc886dfdcdc4089994376c1c38215d2d1ba2f03600a5836da001",
+      "activeBeatIds": [
+        "submit-change"
+      ],
+      "activeNodeIds": [
+        "commit",
+        "pull_request"
+      ],
+      "activeRelationshipIds": [
+        "commit-pull-request"
+      ],
+      "states": [
+        "release.change_submitted"
+      ],
+      "encodedFile": "encoded/commit.png",
+      "encodedPngSha256": "3a1ff1c869559466e8a6bf267c9610a3a41a3bd7365033f764e9089d54e1ec1c",
+      "encodedPixelSha256": "4c1ef34e1875fc886dfdcdc4089994376c1c38215d2d1ba2f03600a5836da001"
+    },
+    {
+      "name": "approval",
+      "timeMs": 1250,
+      "file": "approval.png",
+      "width": 720,
+      "height": 900,
+      "pngSha256": "a21ea9b2eb93a7328d70cdf59504ec48b6c93abd46f7c5e4385d1f9643ff9622",
+      "projectPixelSha256": "5f4099a1ebbf76781eecd32c0a2550e9b07de4bcba79928cf33fe38a8fcef934",
+      "activeBeatIds": [
+        "run-gates"
+      ],
+      "activeNodeIds": [
+        "build",
+        "checks"
+      ],
+      "activeRelationshipIds": [
+        "build-checks"
+      ],
+      "states": [
+        "release.gates_running"
+      ],
+      "encodedFile": "encoded/approval.png",
+      "encodedPngSha256": "7b9285de039d6b28a217024ba9f2214d5c546fd929d5f948582ac5e06e82f3b3",
+      "encodedPixelSha256": "5f4099a1ebbf76781eecd32c0a2550e9b07de4bcba79928cf33fe38a8fcef934"
+    },
+    {
+      "name": "canary",
+      "timeMs": 2250,
+      "file": "canary.png",
+      "width": 720,
+      "height": 900,
+      "pngSha256": "0413ad3d6f42a9ff56080ae68d99025790832a1f9a8172605b84821ca571e72d",
+      "projectPixelSha256": "386ba830899a1c91b15302b6725c28545b9a8f4a3064c662a825927766ce98bd",
+      "activeBeatIds": [
+        "promote-canary"
+      ],
+      "activeNodeIds": [
+        "approval",
+        "deploy"
+      ],
+      "activeRelationshipIds": [
+        "approval-deploy"
+      ],
+      "states": [
+        "release.canary_promoted"
+      ],
+      "encodedFile": "encoded/canary.png",
+      "encodedPngSha256": "b56afdb2b907c812f068ed776bb20d7ff8a917f98b91083edc51eef3b5030264",
+      "encodedPixelSha256": "386ba830899a1c91b15302b6725c28545b9a8f4a3064c662a825927766ce98bd"
+    },
+    {
+      "name": "rollback",
+      "timeMs": 4250,
+      "file": "rollback.png",
+      "width": 720,
+      "height": 900,
+      "pngSha256": "68d83bf12fd1858760d615e54d2e22aa7d149a77742fc8884b6d30f0ebd78b05",
+      "projectPixelSha256": "2903426eced7b8705c2cf3795ae8f98abe80f0412312a6fed8ac1710dc0acf96",
+      "activeBeatIds": [
+        "trigger-rollback"
+      ],
+      "activeNodeIds": [
+        "rollback",
+        "verify_prod"
+      ],
+      "activeRelationshipIds": [
+        "verify-rollback"
+      ],
+      "states": [
+        "release.rollback_started"
+      ],
+      "encodedFile": "encoded/rollback.png",
+      "encodedPngSha256": "b773b7e850192a16fdb006597fa8087c47689092cb7f4a47aa895eee6cb619b1",
+      "encodedPixelSha256": "2903426eced7b8705c2cf3795ae8f98abe80f0412312a6fed8ac1710dc0acf96"
+    },
+    {
+      "name": "restored",
+      "timeMs": 4750,
+      "file": "restored.png",
+      "width": 720,
+      "height": 900,
+      "pngSha256": "f79784858a84bde76340d1b2bea8f599bb82396926cd7056da99fbf87ef4fe79",
+      "projectPixelSha256": "8f21daae6e49e0fb45734e60214eca405f8c450da552fcb9119031a4cb2ff25c",
+      "activeBeatIds": [
+        "restore-last-good"
+      ],
+      "activeNodeIds": [
+        "deploy",
+        "rollback"
+      ],
+      "activeRelationshipIds": [
+        "rollback-deploy"
+      ],
+      "states": [
+        "release.restored"
+      ],
+      "encodedFile": "encoded/restored.png",
+      "encodedPngSha256": "08e147f4d38dc940c4ab7054a8d74740d8acba70fbdd0bb41b6bb750e0a035de",
+      "encodedPixelSha256": "8f21daae6e49e0fb45734e60214eca405f8c450da552fcb9119031a4cb2ff25c"
+    }
+  ]
+}

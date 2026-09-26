@@ -1,0 +1,134 @@
+{
+  "schema": "archify.motion-golden.v2",
+  "source": "examples/deployment-release.lifecycle.json",
+  "contract": "examples/motion/deployment-release.motion.json",
+  "contractSha256": "d951bc1b064bf282504bd95bc9d01ecb0602633e7ebbc29fd6a27fc4d1b5f916",
+  "irSemanticSha256": "feaa8f12f7ae11710c63c697fbf3921cde30dbf5b9a517edace5df892b3cd0a1",
+  "encoded": {
+    "file": "motion.mkv",
+    "sha256": "ab4e4e43b37232171c454aaf7be1cf8f287236c7f548d569ea64942fa307c169",
+    "codec": "ffv1-lossless-rgba",
+    "frameRate": 1
+  },
+  "captures": [
+    {
+      "name": "promote",
+      "timeMs": 250,
+      "file": "promote.png",
+      "width": 980,
+      "height": 680,
+      "pngSha256": "e34fdda2478e2db5c6d5e5056004707eb7476073f7d4a2301bc0eaf094314815",
+      "projectPixelSha256": "b4419501cf80302d0d4c46055d031c62c7a3a3a4e3e0ab839aa5e1f802abd2ec",
+      "activeBeatIds": [
+        "queue-release"
+      ],
+      "activeNodeIds": [
+        "queued"
+      ],
+      "activeRelationshipIds": [],
+      "states": [
+        "release.queued"
+      ],
+      "encodedFile": "encoded/promote.png",
+      "encodedPngSha256": "17a85361f47feacfdcceff1b21cd360fe631e3143285a097d3cd4eabcafe6d0d",
+      "encodedPixelSha256": "b4419501cf80302d0d4c46055d031c62c7a3a3a4e3e0ab839aa5e1f802abd2ec"
+    },
+    {
+      "name": "approval",
+      "timeMs": 1250,
+      "file": "approval.png",
+      "width": 980,
+      "height": 680,
+      "pngSha256": "a4856bf136236bed83c6e23d2a6733ee34637c9296fefa5047c4ef8aaa4191ae",
+      "projectPixelSha256": "176b08b7b7d1447e191a4a2aaf29460b1a42f6d56d2873e088505e16f29eedcf",
+      "activeBeatIds": [
+        "await-approval"
+      ],
+      "activeNodeIds": [
+        "approval",
+        "verifying"
+      ],
+      "activeRelationshipIds": [
+        "verifying-approval"
+      ],
+      "states": [
+        "release.awaiting_approval"
+      ],
+      "encodedFile": "encoded/approval.png",
+      "encodedPngSha256": "bf13ae50e893554bca108cae2e3c7f0be7b0cc1b493dd1cbe2ccd3384350fd2a",
+      "encodedPixelSha256": "176b08b7b7d1447e191a4a2aaf29460b1a42f6d56d2873e088505e16f29eedcf"
+    },
+    {
+      "name": "health-pause",
+      "timeMs": 2250,
+      "file": "health-pause.png",
+      "width": 980,
+      "height": 680,
+      "pngSha256": "d9eb0d4d11afb92022a37216a77f33f5276754571a344aabc25ffa48cf752c28",
+      "projectPixelSha256": "445c0b7b5a346d9b3e248a5cd979a9d3c823ebbd06858126952242bf4589c3e6",
+      "activeBeatIds": [
+        "ready-release"
+      ],
+      "activeNodeIds": [
+        "ready"
+      ],
+      "activeRelationshipIds": [],
+      "states": [
+        "release.ready"
+      ],
+      "encodedFile": "encoded/health-pause.png",
+      "encodedPngSha256": "3544106b509105fe0c94e1d3d98a864a672ea64ad2b57f73663ce625f8271a6b",
+      "encodedPixelSha256": "445c0b7b5a346d9b3e248a5cd979a9d3c823ebbd06858126952242bf4589c3e6"
+    },
+    {
+      "name": "failed",
+      "timeMs": 3350,
+      "file": "failed.png",
+      "width": 980,
+      "height": 680,
+      "pngSha256": "faf6cd72ca6781acc575d408a960a8e5c7520c95566e1121393360d0e014c3ec",
+      "projectPixelSha256": "04ccd7787d534f391270236430b1d9d36b7d9238885032184c9f01e6139ce525",
+      "activeBeatIds": [
+        "rollback-failure"
+      ],
+      "activeNodeIds": [
+        "failed",
+        "rollback"
+      ],
+      "activeRelationshipIds": [
+        "rollback-failed"
+      ],
+      "states": [
+        "release.failed"
+      ],
+      "encodedFile": "encoded/failed.png",
+      "encodedPngSha256": "a8a7e0527ccad0010e2e98b7adc97ea3cff1a6e0ed8f597341f167c62cae972f",
+      "encodedPixelSha256": "04ccd7787d534f391270236430b1d9d36b7d9238885032184c9f01e6139ce525"
+    },
+    {
+      "name": "restored",
+      "timeMs": 4750,
+      "file": "restored.png",
+      "width": 980,
+      "height": 680,
+      "pngSha256": "8d02da78bd2f886478e1855746457a075beab72b99d755b37e6496a4c388a35c",
+      "projectPixelSha256": "a211fbd5adb72c07b31e4d4f86a410342787e875dc45f896018c6d2b84429f8b",
+      "activeBeatIds": [
+        "restore-service"
+      ],
+      "activeNodeIds": [
+        "paused",
+        "rolled_back"
+      ],
+      "activeRelationshipIds": [
+        "paused-rolled-back"
+      ],
+      "states": [
+        "release.restored"
+      ],
+      "encodedFile": "encoded/restored.png",
+      "encodedPngSha256": "a8c882ec0c891e8875662680088ee3038081708345e1dc4de4ecb044685e99c6",
+      "encodedPixelSha256": "a211fbd5adb72c07b31e4d4f86a410342787e875dc45f896018c6d2b84429f8b"
+    }
+  ]
+}
