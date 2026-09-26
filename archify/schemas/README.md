@@ -27,7 +27,7 @@ state and compiled native geometry: Sequence materializes exact authored-message
 transit frames; Workflow follows compiled path points for main-path, gate,
 failure, and rollback transit; Lifecycle activates promotion states and follows
 stable authored transitions for approval, cancellation, health pause, failure,
-and restoration. The checked-in Async Job Roundtrip PNG receipt is regenerated
+and restoration; Data Flow follows native compiled routes for fan-out, fan-in, restricted dead-letter review, and audited replay. The checked-in Async Job Roundtrip PNG receipt is regenerated
 with `npm run generate:motion-goldens`.
 
 Every diagram schema requires `schema_version`, `diagram_type`, `meta` (with

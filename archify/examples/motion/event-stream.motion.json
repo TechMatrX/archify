@@ -1,0 +1,308 @@
+{
+  "motion_version": "archify.motion.v1",
+  "diagram_type": "dataflow",
+  "source": {
+    "title": "Order Event-stream Topology",
+    "diagramId": "event-stream"
+  },
+  "beats": [
+    {
+      "id": "publish-events",
+      "label": "Publish order and payment events",
+      "startMs": 0,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "checkout",
+          "billing",
+          "orders",
+          "payments"
+        ],
+        "relationships": [
+          "checkout-orders",
+          "billing-payments"
+        ]
+      },
+      "state": "events.published"
+    },
+    {
+      "id": "dispatch-processors",
+      "label": "Dispatch partitioned streams to processors",
+      "startMs": 500,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "orders",
+          "payments",
+          "validate",
+          "enrich"
+        ],
+        "relationships": [
+          "orders-validate",
+          "payments-enrich"
+        ]
+      },
+      "state": "events.dispatched"
+    },
+    {
+      "id": "converge-state",
+      "label": "Converge valid facts into materialized state",
+      "startMs": 1000,
+      "durationMs": 500,
+      "primitive": "converge",
+      "targets": {
+        "nodes": [
+          "validate",
+          "enrich",
+          "state"
+        ],
+        "relationships": [
+          "validate-state",
+          "enrich-state"
+        ]
+      },
+      "state": "state.materialized"
+    },
+    {
+      "id": "serve-consumers",
+      "label": "Fan out governed state to consumers",
+      "startMs": 1500,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "state",
+          "fulfillment",
+          "analytics"
+        ],
+        "relationships": [
+          "state-fulfillment",
+          "state-analytics"
+        ]
+      },
+      "state": "consumers.served"
+    },
+    {
+      "id": "isolate-failures",
+      "label": "Isolate invalid and poison events",
+      "startMs": 2000,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "validate",
+          "enrich",
+          "dlq"
+        ],
+        "relationships": [
+          "validate-dlq",
+          "enrich-dlq"
+        ]
+      },
+      "state": "failures.isolated"
+    },
+    {
+      "id": "inspect-restricted",
+      "label": "Expose a restricted failure sample to on-call",
+      "startMs": 2500,
+      "durationMs": 500,
+      "primitive": "gate",
+      "targets": {
+        "nodes": [
+          "dlq",
+          "ops"
+        ],
+        "relationships": [
+          "dlq-ops"
+        ]
+      },
+      "state": "failures.restricted_review"
+    },
+    {
+      "id": "approve-replay",
+      "label": "Approve an audited replay batch",
+      "startMs": 3000,
+      "durationMs": 500,
+      "primitive": "gate",
+      "targets": {
+        "nodes": [
+          "dlq",
+          "replay"
+        ],
+        "relationships": [
+          "dlq-replay"
+        ]
+      },
+      "state": "replay.approved"
+    },
+    {
+      "id": "replay-batch",
+      "label": "Replay the approved batch under operator control",
+      "startMs": 3500,
+      "durationMs": 500,
+      "primitive": "retry",
+      "targets": {
+        "nodes": [
+          "dlq",
+          "replay"
+        ],
+        "relationships": [
+          "dlq-replay"
+        ]
+      },
+      "state": "replay.executed"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "publish-fanout",
+      "atMs": 250,
+      "activeBeats": [
+        "publish-events"
+      ],
+      "activeNodes": [
+        "billing",
+        "checkout",
+        "orders",
+        "payments"
+      ],
+      "activeRelationships": [
+        "billing-payments",
+        "checkout-orders"
+      ],
+      "states": [
+        "events.published"
+      ]
+    },
+    {
+      "id": "processor-fanout",
+      "atMs": 750,
+      "activeBeats": [
+        "dispatch-processors"
+      ],
+      "activeNodes": [
+        "enrich",
+        "orders",
+        "payments",
+        "validate"
+      ],
+      "activeRelationships": [
+        "orders-validate",
+        "payments-enrich"
+      ],
+      "states": [
+        "events.dispatched"
+      ]
+    },
+    {
+      "id": "state-fanin",
+      "atMs": 1250,
+      "activeBeats": [
+        "converge-state"
+      ],
+      "activeNodes": [
+        "enrich",
+        "state",
+        "validate"
+      ],
+      "activeRelationships": [
+        "enrich-state",
+        "validate-state"
+      ],
+      "states": [
+        "state.materialized"
+      ]
+    },
+    {
+      "id": "consumer-fanout",
+      "atMs": 1750,
+      "activeBeats": [
+        "serve-consumers"
+      ],
+      "activeNodes": [
+        "analytics",
+        "fulfillment",
+        "state"
+      ],
+      "activeRelationships": [
+        "state-analytics",
+        "state-fulfillment"
+      ],
+      "states": [
+        "consumers.served"
+      ]
+    },
+    {
+      "id": "dlq-fanout",
+      "atMs": 2250,
+      "activeBeats": [
+        "isolate-failures"
+      ],
+      "activeNodes": [
+        "dlq",
+        "enrich",
+        "validate"
+      ],
+      "activeRelationships": [
+        "enrich-dlq",
+        "validate-dlq"
+      ],
+      "states": [
+        "failures.isolated"
+      ]
+    },
+    {
+      "id": "restricted-dlq-review",
+      "atMs": 2750,
+      "activeBeats": [
+        "inspect-restricted"
+      ],
+      "activeNodes": [
+        "dlq",
+        "ops"
+      ],
+      "activeRelationships": [
+        "dlq-ops"
+      ],
+      "states": [
+        "failures.restricted_review"
+      ]
+    },
+    {
+      "id": "replay-approved",
+      "atMs": 3250,
+      "activeBeats": [
+        "approve-replay"
+      ],
+      "activeNodes": [
+        "dlq",
+        "replay"
+      ],
+      "activeRelationships": [
+        "dlq-replay"
+      ],
+      "states": [
+        "replay.approved"
+      ]
+    },
+    {
+      "id": "replay-executed",
+      "atMs": 3750,
+      "activeBeats": [
+        "replay-batch"
+      ],
+      "activeNodes": [
+        "dlq",
+        "replay"
+      ],
+      "activeRelationships": [
+        "dlq-replay"
+      ],
+      "states": [
+        "replay.executed"
+      ]
+    }
+  ]
+}

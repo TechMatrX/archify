@@ -36,18 +36,18 @@
     { "id": "ops", "type": "external", "label": "On-call", "sublabel": "DLQ owner", "stage": 4, "row": 3, "yOffset": -18, "tag": "SRE" }
   ],
   "flows": [
-    { "from": "checkout", "to": "orders", "label": "OrderPlaced", "classification": "schema v1", "variant": "emphasis", "route": "straight" },
-    { "from": "billing", "to": "payments", "label": "PaymentCaptured", "classification": "schema v2", "variant": "emphasis", "route": "straight" },
-    { "from": "orders", "to": "validate", "label": "ordered orders", "classification": "consumer group", "variant": "emphasis", "route": "straight" },
-    { "from": "payments", "to": "enrich", "label": "payment facts", "classification": "at-least-once", "variant": "emphasis", "route": "straight" },
-    { "from": "validate", "to": "state", "label": "valid order", "classification": "idempotent", "variant": "emphasis", "route": "vertical-channel" },
-    { "from": "enrich", "to": "state", "label": "enriched payment", "classification": "idempotent", "variant": "default", "route": "vertical-channel" },
-    { "from": "state", "to": "fulfillment", "label": "ready orders", "classification": "read model", "variant": "emphasis", "route": "vertical-channel" },
-    { "from": "state", "to": "analytics", "label": "order facts", "classification": "non-PII", "variant": "default", "route": "vertical-channel" },
-    { "from": "validate", "to": "dlq", "label": "invalid event", "classification": "dead letter", "variant": "security", "fromSide": "top", "toSide": "top", "via": [[530, 80], [20, 80], [20, 550], [745, 550]], "labelAt": [300, 550] },
-    { "from": "enrich", "to": "dlq", "label": "poison event", "classification": "dead letter", "variant": "security", "route": "bottom-channel", "labelDy": 30 },
-    { "from": "dlq", "to": "ops", "label": "failure sample", "classification": "restricted", "variant": "security", "route": "vertical-channel" },
-    { "from": "dlq", "to": "replay", "label": "approved replay", "classification": "audited batch", "variant": "dashed", "route": "straight", "labelDy": 30 }
+    { "id": "checkout-orders", "from": "checkout", "to": "orders", "label": "OrderPlaced", "classification": "schema v1", "variant": "emphasis", "route": "straight" },
+    { "id": "billing-payments", "from": "billing", "to": "payments", "label": "PaymentCaptured", "classification": "schema v2", "variant": "emphasis", "route": "straight" },
+    { "id": "orders-validate", "from": "orders", "to": "validate", "label": "ordered orders", "classification": "consumer group", "variant": "emphasis", "route": "straight" },
+    { "id": "payments-enrich", "from": "payments", "to": "enrich", "label": "payment facts", "classification": "at-least-once", "variant": "emphasis", "route": "straight" },
+    { "id": "validate-state", "from": "validate", "to": "state", "label": "valid order", "classification": "idempotent", "variant": "emphasis", "route": "vertical-channel" },
+    { "id": "enrich-state", "from": "enrich", "to": "state", "label": "enriched payment", "classification": "idempotent", "variant": "default", "route": "vertical-channel" },
+    { "id": "state-fulfillment", "from": "state", "to": "fulfillment", "label": "ready orders", "classification": "read model", "variant": "emphasis", "route": "vertical-channel" },
+    { "id": "state-analytics", "from": "state", "to": "analytics", "label": "order facts", "classification": "non-PII", "variant": "default", "route": "vertical-channel" },
+    { "id": "validate-dlq", "from": "validate", "to": "dlq", "label": "invalid event", "classification": "dead letter", "variant": "security", "fromSide": "top", "toSide": "top", "via": [[530, 80], [20, 80], [20, 550], [745, 550]], "labelAt": [300, 550] },
+    { "id": "enrich-dlq", "from": "enrich", "to": "dlq", "label": "poison event", "classification": "dead letter", "variant": "security", "route": "bottom-channel", "labelDy": 30 },
+    { "id": "dlq-ops", "from": "dlq", "to": "ops", "label": "failure sample", "classification": "restricted", "variant": "security", "route": "vertical-channel" },
+    { "id": "dlq-replay", "from": "dlq", "to": "replay", "label": "approved replay", "classification": "audited batch", "variant": "dashed", "route": "straight", "labelDy": 30 }
   ],
   "cards": [
     { "dot": "amber", "title": "Transit Contract", "items": ["Every event and topic is named", "Partition keys preserve per-order ordering", "Consumer groups expose processing ownership"] },

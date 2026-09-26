@@ -8,6 +8,7 @@ import { compile, compileMotion, MotionContractError } from '../renderers/shared
 import { interpretSequenceMotion, renderSequenceMotionCheckpoint } from '../renderers/sequence/sequence-motion-interpreter.mjs';
 import { interpretWorkflowMotion, renderWorkflowMotionCheckpoint } from '../renderers/workflow/workflow-motion-interpreter.mjs';
 import { interpretLifecycleMotion, renderLifecycleMotionCheckpoint } from '../renderers/lifecycle/lifecycle-motion-interpreter.mjs';
+import { interpretDataflowMotion, renderDataflowMotionCheckpoint } from '../renderers/dataflow/dataflow-motion-interpreter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (relative) => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
@@ -19,6 +20,8 @@ const workflowSource = () => readJson('examples/release-delivery.workflow.json')
 const workflowContract = () => readJson('examples/motion/release-delivery.motion.json');
 const lifecycleSource = () => readJson('examples/deployment-release.lifecycle.json');
 const lifecycleContract = () => readJson('examples/motion/deployment-release.motion.json');
+const dataflowSource = () => readJson('examples/event-stream.dataflow.json');
+const dataflowContract = () => readJson('examples/motion/event-stream.motion.json');
 
 test('archify.motion.v1 compiles the Async Job Roundtrip golden against authored ids', () => {
   assert.equal(compileMotion, compile);
@@ -191,6 +194,49 @@ test('Lifecycle terminal branches are exclusive and deterministic across transit
   assert.deepEqual(first.seek(4750).states, ['release.restored']);
   assert.notDeepEqual(first.seek(3350).activeNodeIds, first.seek(4750).activeNodeIds);
   assert.deepEqual(interpretLifecycleMotion(reordered, second.seek(4250)).transits[0].point, { x: 710, y: 233 });
+});
+
+test('Data Flow interpreter follows native compiled fan-in geometry', () => {
+  const timeline = compile(dataflowContract(), dataflowSource());
+  assert.equal(timeline.receipt.diagramType, 'dataflow');
+  assert.equal(timeline.receipt.beatCount, 8);
+  assert.equal(timeline.receipt.assertionCount, 8);
+  assert.equal(timeline.durationMs, 4000);
+  const frame = interpretDataflowMotion(dataflowSource(), timeline.seek(1250));
+  assert.deepEqual(frame.activeRelationshipIds, ['enrich-state', 'validate-state']);
+  assert.deepEqual(frame.activeNodeIds, ['enrich', 'state', 'validate']);
+  assert.deepEqual(frame.states, ['state.materialized']);
+  assert.deepEqual(frame.transits.map(({ id, primitive, point }) => ({ id, primitive, point })), [
+    { id: 'validate-state', primitive: 'converge', point: { x: 630, y: 221.5 } },
+    { id: 'enrich-state', primitive: 'converge', point: { x: 630, y: 320.5 } },
+  ]);
+  const checkpoint = renderDataflowMotionCheckpoint(dataflowSource(), frame);
+  assert.match(checkpoint, /data-motion-time-ms="1250"/);
+  assert.match(checkpoint, /data-motion-relationship="validate-state" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-node="state" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-transit="enrich-state"/);
+  assert.doesNotMatch(checkpoint, /setTimeout|requestAnimationFrame|Date\.now/);
+  assert.equal(renderDataflowMotionCheckpoint(dataflowSource(), frame), checkpoint);
+});
+
+test('Data Flow fan-out, restricted DLQ review, and replay stay deterministic', () => {
+  const source = dataflowSource();
+  const timeline = compile(dataflowContract(), source);
+  assert.deepEqual(timeline.seek(2250).activeRelationshipIds, ['enrich-dlq', 'validate-dlq']);
+  assert.deepEqual(timeline.seek(2250).states, ['failures.isolated']);
+  assert.deepEqual(timeline.seek(2750).activeRelationshipIds, ['dlq-ops']);
+  assert.deepEqual(timeline.seek(2750).states, ['failures.restricted_review']);
+  assert.equal(source.flows.find(({ id }) => id === 'dlq-ops').classification, 'restricted');
+  assert.equal(source.flows.find(({ id }) => id === 'dlq-ops').variant, 'security');
+  const replay = interpretDataflowMotion(source, timeline.seek(3750));
+  assert.deepEqual(replay.activeRelationshipIds, ['dlq-replay']);
+  assert.deepEqual(replay.states, ['replay.executed']);
+  assert.deepEqual(replay.transits[0].point, { x: 852.5, y: 613 });
+  const reordered = dataflowSource();
+  reordered.flows.reverse();
+  const reorderedTimeline = compile(dataflowContract(), reordered);
+  assert.deepEqual(reorderedTimeline.receipt, timeline.receipt);
+  assert.deepEqual(reorderedTimeline.seek(3750), timeline.seek(3750));
 });
 
 test('Production Deployment Ownership proves the Architecture Phase 1 anchor', () => {
