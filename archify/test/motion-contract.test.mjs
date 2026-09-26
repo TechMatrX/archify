@@ -9,6 +9,7 @@ import { interpretSequenceMotion, renderSequenceMotionCheckpoint } from '../rend
 import { interpretWorkflowMotion, renderWorkflowMotionCheckpoint } from '../renderers/workflow/workflow-motion-interpreter.mjs';
 import { interpretLifecycleMotion, renderLifecycleMotionCheckpoint } from '../renderers/lifecycle/lifecycle-motion-interpreter.mjs';
 import { interpretDataflowMotion, renderDataflowMotionCheckpoint } from '../renderers/dataflow/dataflow-motion-interpreter.mjs';
+import { interpretArchitectureMotion, renderArchitectureMotionCheckpoint } from '../renderers/architecture/architecture-motion-interpreter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (relative) => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
@@ -262,6 +263,46 @@ test('Production Deployment Ownership proves the Architecture Phase 1 anchor', (
       { id: 'worker-observability-otlp', beatId: 'emit-evidence', primitive: 'fanout', progress: 0.5 },
     ],
   });
+});
+
+test('Architecture interpreter follows native compiled deployment geometry', () => {
+  const timeline = compile(architectureContract(), architectureSource());
+  const frame = interpretArchitectureMotion(architectureSource(), timeline.seek(1250));
+  assert.deepEqual(frame.activeRelationshipIds, ['gateway-api-a-route', 'gateway-api-b-route']);
+  assert.deepEqual(frame.activeNodeIds, ['api_a', 'api_b', 'gateway']);
+  assert.deepEqual(frame.states, ['request.dispatched']);
+  assert.deepEqual(frame.transits.map(({ id, primitive, point }) => ({ id, primitive, point })), [
+    { id: 'gateway-api-a-route', primitive: 'fanout', point: { x: 594, y: 278 } },
+    { id: 'gateway-api-b-route', primitive: 'fanout', point: { x: 594, y: 383 } },
+  ]);
+  const checkpoint = renderArchitectureMotionCheckpoint(architectureSource(), frame);
+  assert.match(checkpoint, /data-motion-time-ms="1250"/);
+  assert.match(checkpoint, /data-motion-relationship="gateway-api-a-route" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-node="api_a" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-transit="gateway-api-b-route"/);
+  assert.doesNotMatch(checkpoint, /setTimeout|requestAnimationFrame|Date\\.now/);
+  assert.equal(renderArchitectureMotionCheckpoint(architectureSource(), frame), checkpoint);
+});
+
+test('Architecture async, replication, and evidence routes remain deterministic', () => {
+  const source = architectureSource();
+  const timeline = compile(architectureContract(), source);
+  assert.deepEqual(timeline.seek(2250).activeRelationshipIds, ['api-a-publish', 'api-b-publish']);
+  assert.deepEqual(timeline.seek(2250).states, ['async.published']);
+  assert.deepEqual(timeline.seek(3250).activeRelationshipIds, ['postgres-replica-wal']);
+  assert.deepEqual(timeline.seek(3250).states, ['state.replicated']);
+  const evidence = interpretArchitectureMotion(source, timeline.seek(3750));
+  assert.deepEqual(evidence.activeRelationshipIds, ['worker-audit-evidence', 'worker-observability-otlp']);
+  assert.deepEqual(evidence.states, ['evidence.emitted']);
+  assert.deepEqual(evidence.transits.map(({ id, point }) => ({ id, point })), [
+    { id: 'worker-audit-evidence', point: { x: 1253, y: 405 } },
+    { id: 'worker-observability-otlp', point: { x: 1253, y: 223.5 } },
+  ]);
+  const reordered = architectureSource();
+  reordered.connections.reverse();
+  const reorderedTimeline = compile(architectureContract(), reordered);
+  assert.deepEqual(reorderedTimeline.receipt, timeline.receipt);
+  assert.deepEqual(reorderedTimeline.seek(3750), timeline.seek(3750));
 });
 
 test('motion compilation is byte-deterministic across relationship source order', () => {
