@@ -91,7 +91,8 @@
             "minItems": 1,
             "items": { "$ref": "#/$defs/id" }
           },
-          "note": { "type": "string", "maxLength": 140 }
+          "note": { "type": "string", "maxLength": 140 },
+          "topologyRelation": { "enum": ["boundary", "route", "fanout", "converge", "commit-emit", "handoff", "return-loop"] }
         }
       }
     },
