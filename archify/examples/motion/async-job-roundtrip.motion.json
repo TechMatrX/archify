@@ -1,0 +1,335 @@
+{
+  "motion_version": "archify.motion.v1",
+  "diagram_type": "sequence",
+  "source": {
+    "title": "Async Job Roundtrip",
+    "diagramId": "async-job-roundtrip"
+  },
+  "beats": [
+    {
+      "id": "request",
+      "label": "Submit the job",
+      "startMs": 0,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "client",
+          "api"
+        ],
+        "relationships": [
+          "submit-job"
+        ]
+      },
+      "state": "request.submitted"
+    },
+    {
+      "id": "enqueue",
+      "label": "Persist queue ownership",
+      "startMs": 500,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "api",
+          "queue"
+        ],
+        "relationships": [
+          "enqueue-job"
+        ]
+      },
+      "state": "job.queued"
+    },
+    {
+      "id": "acknowledge",
+      "label": "Return the durable job id",
+      "startMs": 1000,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "api",
+          "client"
+        ],
+        "relationships": [
+          "acknowledge-job"
+        ]
+      },
+      "state": "request.accepted"
+    },
+    {
+      "id": "deliver",
+      "label": "Deliver queued work",
+      "startMs": 1500,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "queue",
+          "worker"
+        ],
+        "relationships": [
+          "deliver-job"
+        ]
+      },
+      "state": "job.delivered"
+    },
+    {
+      "id": "perform",
+      "label": "Invoke the provider",
+      "startMs": 2000,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "worker",
+          "provider"
+        ],
+        "relationships": [
+          "perform-work"
+        ]
+      },
+      "state": "job.processing"
+    },
+    {
+      "id": "provider-result",
+      "label": "Receive provider result or timeout",
+      "startMs": 2500,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "provider",
+          "worker"
+        ],
+        "relationships": [
+          "provider-result"
+        ]
+      },
+      "state": "provider.returned"
+    },
+    {
+      "id": "retry",
+      "label": "Re-enter the queue after timeout",
+      "startMs": 3000,
+      "durationMs": 500,
+      "primitive": "retry",
+      "targets": {
+        "nodes": [
+          "worker",
+          "queue"
+        ],
+        "relationships": [
+          "retry-timeout"
+        ]
+      },
+      "state": "job.retrying"
+    },
+    {
+      "id": "persist",
+      "label": "Persist the final state",
+      "startMs": 3500,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "worker",
+          "store"
+        ],
+        "relationships": [
+          "persist-final-state"
+        ]
+      },
+      "state": "job.completed"
+    },
+    {
+      "id": "emit",
+      "label": "Emit completion notification",
+      "startMs": 4000,
+      "durationMs": 500,
+      "primitive": "callback",
+      "targets": {
+        "nodes": [
+          "worker",
+          "notify"
+        ],
+        "relationships": [
+          "emit-completion"
+        ]
+      },
+      "state": "notification.emitted"
+    },
+    {
+      "id": "callback",
+      "label": "Deliver signed webhook",
+      "startMs": 4500,
+      "durationMs": 500,
+      "primitive": "callback",
+      "targets": {
+        "nodes": [
+          "notify",
+          "client"
+        ],
+        "relationships": [
+          "deliver-webhook"
+        ]
+      },
+      "state": "notification.delivered"
+    },
+    {
+      "id": "poll",
+      "label": "Poll the job status",
+      "startMs": 5000,
+      "durationMs": 500,
+      "primitive": "reconcile",
+      "targets": {
+        "nodes": [
+          "client",
+          "api"
+        ],
+        "relationships": [
+          "poll-job"
+        ]
+      },
+      "state": "reconcile.requested"
+    },
+    {
+      "id": "read",
+      "label": "Read the source of truth",
+      "startMs": 5500,
+      "durationMs": 500,
+      "primitive": "reconcile",
+      "targets": {
+        "nodes": [
+          "api",
+          "store"
+        ],
+        "relationships": [
+          "read-job-status"
+        ]
+      },
+      "state": "reconcile.reading"
+    },
+    {
+      "id": "completed",
+      "label": "Return completed status",
+      "startMs": 6000,
+      "durationMs": 500,
+      "primitive": "reconcile",
+      "targets": {
+        "nodes": [
+          "store",
+          "api"
+        ],
+        "relationships": [
+          "return-completed-status"
+        ]
+      },
+      "state": "reconcile.completed"
+    },
+    {
+      "id": "final",
+      "label": "Return final result",
+      "startMs": 6500,
+      "durationMs": 500,
+      "primitive": "reconcile",
+      "targets": {
+        "nodes": [
+          "api",
+          "client"
+        ],
+        "relationships": [
+          "return-final-result"
+        ]
+      },
+      "state": "reconcile.converged"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "request-in-transit",
+      "atMs": 250,
+      "activeBeats": [
+        "request"
+      ],
+      "activeNodes": [
+        "api",
+        "client"
+      ],
+      "activeRelationships": [
+        "submit-job"
+      ],
+      "states": [
+        "request.submitted"
+      ]
+    },
+    {
+      "id": "queued-in-transit",
+      "atMs": 750,
+      "activeBeats": [
+        "enqueue"
+      ],
+      "activeNodes": [
+        "api",
+        "queue"
+      ],
+      "activeRelationships": [
+        "enqueue-job"
+      ],
+      "states": [
+        "job.queued"
+      ]
+    },
+    {
+      "id": "processing-in-transit",
+      "atMs": 2250,
+      "activeBeats": [
+        "perform"
+      ],
+      "activeNodes": [
+        "provider",
+        "worker"
+      ],
+      "activeRelationships": [
+        "perform-work"
+      ],
+      "states": [
+        "job.processing"
+      ]
+    },
+    {
+      "id": "callback-in-transit",
+      "atMs": 4750,
+      "activeBeats": [
+        "callback"
+      ],
+      "activeNodes": [
+        "client",
+        "notify"
+      ],
+      "activeRelationships": [
+        "deliver-webhook"
+      ],
+      "states": [
+        "notification.delivered"
+      ]
+    },
+    {
+      "id": "poll-reconciled-in-transit",
+      "atMs": 6750,
+      "activeBeats": [
+        "final"
+      ],
+      "activeNodes": [
+        "api",
+        "client"
+      ],
+      "activeRelationships": [
+        "return-final-result"
+      ],
+      "states": [
+        "reconcile.converged"
+      ]
+    }
+  ]
+}

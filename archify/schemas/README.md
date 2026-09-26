@@ -12,7 +12,15 @@ against one of the schemas in this folder before any layout work happens.
 | `dataflow.schema.json` | `diagram_type: "dataflow"` | `stages`, `nodes`, `flows` |
 | `lifecycle.schema.json` | `diagram_type: "lifecycle"` | `lanes`, `states`, `transitions` |
 | `architecture.schema.json` | `diagram_type: "architecture"` | `components`, `boundaries`, `connections` |
+| `motion.schema.json` | `motion_version: "archify.motion.v1"` | `beats`, `assertions` |
 | `common.schema.json` | shared `$defs` only (no top-level document) | — |
+
+The motion contract is a separate executable timeline bound to stable node and
+relationship IDs in one typed IR. It declares semantic beats, reusable motion
+primitives, timing, and deterministic assertions. It cannot carry layout
+coordinates or duplicate topology; `compile(contract, ir)` rejects unresolved
+or duplicate semantic IDs before playback, while `seek(timeMs)` and
+`inspect()` expose deterministic in-transit state for automated acceptance.
 
 Every diagram schema requires `schema_version`, `diagram_type`, `meta` (with
 `title`), and its structural arrays — except `segments`, `activations`, and
