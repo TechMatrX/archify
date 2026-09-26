@@ -21,6 +21,8 @@ const workflowSource = () => readJson('examples/release-delivery.workflow.json')
 const workflowContract = () => readJson('examples/motion/release-delivery.motion.json');
 const lifecycleSource = () => readJson('examples/deployment-release.lifecycle.json');
 const lifecycleContract = () => readJson('examples/motion/deployment-release.motion.json');
+const agentRunSource = () => readJson('examples/agent-run.lifecycle.json');
+const agentRunContract = () => readJson('examples/motion/agent-run.motion.json');
 const dataflowSource = () => readJson('examples/event-stream.dataflow.json');
 const dataflowContract = () => readJson('examples/motion/event-stream.motion.json');
 
@@ -227,6 +229,26 @@ test('Lifecycle terminal branches are exclusive and deterministic across transit
   assert.deepEqual(first.seek(4750).states, ['release.restored']);
   assert.notDeepEqual(first.seek(3350).activeNodeIds, first.seek(4750).activeNodeIds);
   assert.deepEqual(interpretLifecycleMotion(reordered, second.seek(4250)).transits[0].point, { x: 710, y: 233 });
+});
+
+test('Agent Run Lifecycle reuses native compiled recovery geometry', () => {
+  const timeline = compile(agentRunContract(), agentRunSource());
+  assert.equal(timeline.receipt.diagramType, 'lifecycle');
+  assert.equal(timeline.receipt.beatCount, 4);
+  assert.equal(timeline.receipt.assertionCount, 2);
+  assert.equal(timeline.durationMs, 2000);
+  const frame = interpretLifecycleMotion(agentRunSource(), timeline.seek(1250));
+  assert.deepEqual(frame.activeRelationshipIds, ['failed-retry']);
+  assert.deepEqual(frame.activeNodeIds, ['executing', 'failed']);
+  assert.deepEqual(frame.states, ['run.retrying']);
+  assert.deepEqual(frame.transits[0].points, [
+    { x: 339, y: 385 }, { x: 20, y: 385 }, { x: 20, y: 80 }, { x: 402, y: 80 }, { x: 402, y: 126 },
+  ]);
+  const checkpoint = renderLifecycleMotionCheckpoint(agentRunSource(), frame);
+  assert.match(checkpoint, /data-motion-relationship="failed-retry" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-node="failed" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-transit="failed-retry"/);
+  assert.equal(renderLifecycleMotionCheckpoint(agentRunSource(), frame), checkpoint);
 });
 
 test('Data Flow interpreter follows native compiled fan-in geometry', () => {

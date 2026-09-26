@@ -1,19 +1,11 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { MotionContractError } from '../shared/motion-runtime.mjs';
 
-const LAYOUT = Object.freeze({
-  phaseY: 126,
-  eventY: 278,
-  outcomeY: 450,
-  phaseW: 118,
-  phaseH: 62,
-  eventW: 126,
-  eventH: 58,
-  outcomeW: 118,
-  outcomeH: 58,
-  phaseXs: Object.freeze([94, 248, 402, 556, 710]),
-  eventXs: Object.freeze([402, 556, 710]),
-  outcomeXs: Object.freeze([402, 556, 710]),
-});
+const renderer = path.join(path.dirname(fileURLToPath(import.meta.url)), 'render-lifecycle.mjs');
 
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value));
@@ -31,28 +23,8 @@ function fail(rule, message) {
   throw new MotionContractError(message, [{ rule, path: '', message }]);
 }
 
-function bandFor(lane) {
-  if (lane === 'main') return 'phase';
-  if (lane === 'terminal') return 'outcome';
-  return 'event';
-}
-
-function measureState(state) {
-  const band = bandFor(state.lane);
-  const width = state.width || (band === 'phase' ? LAYOUT.phaseW : band === 'outcome' ? LAYOUT.outcomeW : LAYOUT.eventW);
-  const height = state.height || (band === 'phase' ? LAYOUT.phaseH : band === 'outcome' ? LAYOUT.outcomeH : LAYOUT.eventH);
-  const xs = band === 'phase' ? LAYOUT.phaseXs : band === 'outcome' ? LAYOUT.outcomeXs : LAYOUT.eventXs;
-  const cx = xs[state.col] ?? xs.at(-1);
-  const y = (band === 'phase' ? LAYOUT.phaseY : band === 'outcome' ? LAYOUT.outcomeY : LAYOUT.eventY) + (state.yOffset || 0);
-  return Object.freeze({ ...state, x: cx - width / 2, y, width, height, cx, cy: y + height / 2 });
-}
-
-function anchor(state, side) {
-  if (side === 'top') return Object.freeze({ x: state.cx, y: state.y });
-  if (side === 'bottom') return Object.freeze({ x: state.cx, y: state.y + state.height });
-  if (side === 'left') return Object.freeze({ x: state.x, y: state.cy });
-  return Object.freeze({ x: state.x + state.width, y: state.cy });
-}
+function attributes(tag) { return Object.fromEntries([...tag.matchAll(/([\w-]+)="([^"]*)"/g)].map((match) => [match[1], match[2]])); }
+function parsePoints(value) { return value.split(';').map((point) => point.split(',').map(Number)).map(([x, y]) => Object.freeze({ x, y })); }
 
 function pointOnPolyline(points, progress) {
   const segments = points.slice(1).map((point, index) => ({
@@ -76,23 +48,23 @@ function pointOnPolyline(points, progress) {
 }
 
 function compileGeometry(lifecycle) {
-  const states = new Map((lifecycle.states || []).map((state) => [state.id, measureState(state)]));
-  const transitions = new Map();
-  for (const transition of lifecycle.transitions || []) {
-    if (!transition.id) continue;
-    const from = states.get(transition.from);
-    const to = states.get(transition.to);
-    if (!from || !to) fail('lifecycle-interpreter-node', `Lifecycle transition "${transition.id}" has an unknown endpoint`);
-    if ((transition.route || 'auto') !== 'straight') {
-      fail('lifecycle-interpreter-route', `Lifecycle transition "${transition.id}" requires compiled support for route "${transition.route}"`);
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-lifecycle-motion-'));
+  try {
+    const source = path.join(temporary, 'source.json');
+    const output = path.join(temporary, 'compiled.html');
+    fs.writeFileSync(source, `${JSON.stringify(lifecycle)}\n`);
+    const result = spawnSync(process.execPath, [renderer, source, output], { encoding: 'utf8', timeout: 30000, env: { ...process.env, ARCHIFY_QUALITY_PROFILE: lifecycle.meta?.quality_profile || 'standard' } });
+    if (result.status !== 0 || !fs.existsSync(output)) fail('lifecycle-interpreter-compile', `Lifecycle motion requires valid compiled geometry: ${(result.stderr || result.stdout || `renderer exited ${result.status}`).trim()}`);
+    const html = fs.readFileSync(output, 'utf8');
+    const svg = /<svg\b[\s\S]*?<\/svg>/.exec(html)?.[0];
+    if (!svg) fail('lifecycle-interpreter-compile', 'Lifecycle renderer did not emit native SVG geometry');
+    const transitions = new Map();
+    for (const match of svg.matchAll(/<path\b[^>]*data-edge-id="[^"]+"[^>]*data-composition-points="[^"]+"[^>]*\/>/g)) {
+      const attrs = attributes(match[0]);
+      transitions.set(attrs['data-edge-id'], Object.freeze({ id: attrs['data-edge-id'], from: attrs['data-edge-from'], to: attrs['data-edge-to'], points: Object.freeze(parsePoints(attrs['data-composition-points'])) }));
     }
-    const points = Object.freeze([
-      anchor(from, transition.fromSide || 'bottom'),
-      anchor(to, transition.toSide || 'top'),
-    ]);
-    transitions.set(transition.id, Object.freeze({ id: transition.id, from: transition.from, to: transition.to, points }));
-  }
-  return Object.freeze({ states, transitions });
+    return Object.freeze({ svg, transitions });
+  } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }
 
 export function interpretLifecycleMotion(lifecycle, motionState) {
@@ -114,14 +86,14 @@ export function interpretLifecycleMotion(lifecycle, motionState) {
       points: route.points,
     });
   });
-  const viewBox = lifecycle.meta?.viewBox || [980, 660];
+  const viewBox = /<svg\b[^>]*viewBox="([^"]+)"/.exec(geometry.svg)?.[1]?.split(/\s+/).map(Number) || [0, 0, 980, 660];
   return Object.freeze({
     diagramType: 'lifecycle',
     timeMs: motionState.timeMs,
     durationMs: motionState.durationMs,
     paused: motionState.paused,
-    width: viewBox[0],
-    height: viewBox[1],
+    width: viewBox[2],
+    height: viewBox[3],
     activeNodeIds: Object.freeze([...motionState.activeNodeIds]),
     activeRelationshipIds: Object.freeze([...motionState.activeRelationshipIds]),
     states: Object.freeze([...motionState.states]),
@@ -133,15 +105,9 @@ export function interpretLifecycleMotion(lifecycle, motionState) {
 export function renderLifecycleMotionCheckpoint(lifecycle, frame) {
   const activeNodes = new Set(frame.activeNodeIds);
   const activeRelationships = new Set(frame.activeRelationshipIds);
-  const transitions = (lifecycle.transitions || []).filter((transition) => transition.id).map((transition) => {
-    const route = frame.geometry.transitions.get(transition.id);
-    const points = route.points.map((point) => `${point.x},${point.y}`).join(' ');
-    return `<polyline data-motion-relationship="${esc(transition.id)}" data-motion-active="${activeRelationships.has(transition.id)}" points="${points}" fill="none" stroke="${activeRelationships.has(transition.id) ? '#49d6ff' : '#52657f'}" stroke-width="${activeRelationships.has(transition.id) ? 4 : 1.5}"/>`;
-  }).join('');
-  const nodes = [...frame.geometry.states.values()].map((state) => {
-    const active = activeNodes.has(state.id);
-    return `<g data-motion-node="${esc(state.id)}" data-motion-active="${active}"><rect x="${state.x}" y="${state.y}" width="${state.width}" height="${state.height}" rx="7" fill="${active ? '#123d4d' : '#14243a'}" stroke="${active ? '#49d6ff' : '#5b7290'}" stroke-width="${active ? 3 : 1.5}"/><text x="${state.cx}" y="${state.cy + 4}" text-anchor="middle" fill="#f8fafc" font-size="11">${esc(state.label)}</text></g>`;
-  }).join('');
+  let svg = frame.geometry.svg.replace(/<path\b[^>]*data-edge-id="([^"]+)"[^>]*data-composition-points="[^"]+"[^>]*\/>/g, (tag, id) => tag.replace('<path ', `<path data-motion-relationship="${esc(id)}" data-motion-active="${activeRelationships.has(id)}" `));
+  svg = svg.replace(/<g\b[^>]*data-node-id="([^"]+)"[^>]*>/g, (tag, id) => tag.replace('<g ', `<g data-motion-node="${esc(id)}" data-motion-active="${activeNodes.has(id)}" `));
   const transits = frame.transits.map((transit) => `<g data-motion-transit="${esc(transit.id)}"><circle cx="${transit.point.x}" cy="${transit.point.y}" r="8" fill="#fff" stroke="#49d6ff" stroke-width="4"/><circle cx="${transit.point.x}" cy="${transit.point.y}" r="15" fill="none" stroke="#49d6ff" stroke-width="3" opacity=".45"/></g>`).join('');
-  return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111f}svg{display:block;width:${frame.width}px;height:${frame.height}px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}</style></head><body><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${frame.width} ${frame.height}" data-motion-time-ms="${frame.timeMs}" data-motion-paused="${frame.paused}">${transitions}${nodes}${transits}<text x="24" y="${frame.height - 20}" fill="#aebed1" font-size="11">${esc(frame.states.join(' · '))} · ${frame.timeMs}ms</text></svg></body></html>`;
+  svg = svg.replace('</svg>', `${transits}<text x="24" y="${frame.height - 20}" fill="#aebed1" font-size="11">${esc(frame.states.join(' · '))} · ${frame.timeMs}ms</text></svg>`);
+  return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111f}svg{display:block;width:${frame.width}px;height:${frame.height}px}</style></head><body data-motion-time-ms="${frame.timeMs}" data-motion-paused="${frame.paused}">${svg}</body></html>`;
 }
