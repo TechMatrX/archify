@@ -45,16 +45,16 @@
     { "id": "rollback", "lane": "exceptions", "col": 5, "type": "messagebus", "label": "Rollback", "sublabel": "last good" }
   ],
   "edges": [
-    { "from": "alert", "to": "page", "label": "page", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
-    { "from": "page", "to": "triage", "route": "bottom-channel", "fromSide": "bottom", "toSide": "bottom" },
-    { "from": "triage", "to": "contain", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
-    { "from": "contain", "to": "recover", "route": "bottom-channel", "fromSide": "bottom", "toSide": "bottom" },
-    { "from": "recover", "to": "verify", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
-    { "from": "verify", "to": "close", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
-    { "from": "triage", "to": "declare", "variant": "security" },
-    { "from": "declare", "to": "update", "variant": "dashed", "fromSide": "top", "toSide": "left", "via": [[430, 16], [20, 16], [20, 615]] },
-    { "from": "update", "to": "escalate", "variant": "security", "route": "drop", "fromSide": "bottom", "toSide": "top" },
-    { "from": "verify", "to": "rollback", "variant": "security", "role": "error", "route": "outside-right", "fromSide": "right", "toSide": "right" }
+    { "id": "alert-page", "from": "alert", "to": "page", "label": "page", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "id": "page-triage", "from": "page", "to": "triage", "route": "bottom-channel", "fromSide": "bottom", "toSide": "bottom" },
+    { "id": "triage-contain", "from": "triage", "to": "contain", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "id": "contain-recover", "from": "contain", "to": "recover", "route": "bottom-channel", "fromSide": "bottom", "toSide": "bottom" },
+    { "id": "recover-verify", "from": "recover", "to": "verify", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "id": "verify-close", "from": "verify", "to": "close", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "id": "triage-declare", "from": "triage", "to": "declare", "variant": "security" },
+    { "id": "declare-update", "from": "declare", "to": "update", "variant": "dashed", "fromSide": "top", "toSide": "left", "via": [[430, 16], [20, 16], [20, 615]] },
+    { "id": "update-escalate", "from": "update", "to": "escalate", "variant": "security", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "id": "verify-rollback", "from": "verify", "to": "rollback", "variant": "security", "role": "error", "route": "outside-right", "fromSide": "right", "toSide": "right" }
   ],
   "cards": [
     { "dot": "rose", "title": "Ownership First", "items": ["A page is not an incident until someone owns command", "Severity and scope are explicit before mitigation spreads", "Escalation names the missing expertise"] },
