@@ -1,0 +1,27 @@
+{
+  "motion_version": "archify.motion.v1",
+  "diagram_type": "workflow",
+  "source": {
+    "title": "Release Delivery Workflow",
+    "diagramId": "release-delivery"
+  },
+  "beats": [
+    { "id": "submit-change", "label": "Submit the reviewed change", "startMs": 0, "durationMs": 500, "primitive": "edge-pulse", "targets": { "nodes": ["commit", "pull_request"], "relationships": ["commit-pull-request"] }, "state": "release.change_submitted" },
+    { "id": "merge-build", "label": "Merge into the reproducible build", "startMs": 500, "durationMs": 500, "primitive": "edge-pulse", "targets": { "nodes": ["pull_request", "build"], "relationships": ["pull-request-build"] }, "state": "release.build_started" },
+    { "id": "run-gates", "label": "Run blocking quality gates", "startMs": 1000, "durationMs": 500, "primitive": "gate", "targets": { "nodes": ["build", "checks"], "relationships": ["build-checks"] }, "state": "release.gates_running" },
+    { "id": "request-approval", "label": "Request release-owner approval", "startMs": 1500, "durationMs": 500, "primitive": "gate", "targets": { "nodes": ["checks", "approval"], "relationships": ["checks-approval"] }, "state": "release.approval_requested" },
+    { "id": "promote-canary", "label": "Promote the approved canary", "startMs": 2000, "durationMs": 500, "primitive": "gate", "targets": { "nodes": ["approval", "deploy"], "relationships": ["approval-deploy"] }, "state": "release.canary_promoted" },
+    { "id": "verify-production", "label": "Verify production health", "startMs": 2500, "durationMs": 500, "primitive": "edge-pulse", "targets": { "nodes": ["deploy", "verify_prod"], "relationships": ["deploy-verify"] }, "state": "release.verifying" },
+    { "id": "announce-release", "label": "Announce only after verification", "startMs": 3000, "durationMs": 500, "primitive": "edge-pulse", "targets": { "nodes": ["verify_prod", "announce"], "relationships": ["verify-announce"] }, "state": "release.announced" },
+    { "id": "stop-on-red", "label": "Stop when a gate fails", "startMs": 3500, "durationMs": 500, "primitive": "gate", "targets": { "nodes": ["checks", "failed"], "relationships": ["checks-failed"] }, "state": "release.stopped" },
+    { "id": "trigger-rollback", "label": "Trigger rollback on unhealthy production", "startMs": 4000, "durationMs": 500, "primitive": "retry", "targets": { "nodes": ["verify_prod", "rollback"], "relationships": ["verify-rollback"] }, "state": "release.rollback_started" },
+    { "id": "restore-last-good", "label": "Restore the last good image", "startMs": 4500, "durationMs": 500, "primitive": "retry", "targets": { "nodes": ["rollback", "deploy"], "relationships": ["rollback-deploy"] }, "state": "release.restored" }
+  ],
+  "assertions": [
+    { "id": "gate-in-transit", "atMs": 1250, "activeBeats": ["run-gates"], "activeNodes": ["build", "checks"], "activeRelationships": ["build-checks"], "states": ["release.gates_running"] },
+    { "id": "approval-in-transit", "atMs": 1750, "activeBeats": ["request-approval"], "activeNodes": ["approval", "checks"], "activeRelationships": ["checks-approval"], "states": ["release.approval_requested"] },
+    { "id": "failed-branch-in-transit", "atMs": 3750, "activeBeats": ["stop-on-red"], "activeNodes": ["checks", "failed"], "activeRelationships": ["checks-failed"], "states": ["release.stopped"] },
+    { "id": "rollback-in-transit", "atMs": 4250, "activeBeats": ["trigger-rollback"], "activeNodes": ["rollback", "verify_prod"], "activeRelationships": ["verify-rollback"], "states": ["release.rollback_started"] },
+    { "id": "restore-in-transit", "atMs": 4750, "activeBeats": ["restore-last-good"], "activeNodes": ["deploy", "rollback"], "activeRelationships": ["rollback-deploy"], "states": ["release.restored"] }
+  ]
+}

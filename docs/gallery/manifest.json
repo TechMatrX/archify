@@ -327,10 +327,10 @@
       "engineeringProfile": null,
       "nodeCount": 10,
       "edgeCount": 10,
-      "artifactBytes": 814097,
-      "artifactSha256": "ebe7c1363e5e7943f885e71029e135b4271b87eeb82255708727692969ec99b7",
-      "sourceBytes": 5164,
-      "sourceSha256": "e5c880417eac1623923c3dd5461e0c78acd762e1621a28bd53fc14a84cad6a91",
+      "artifactBytes": 814532,
+      "artifactSha256": "3a5de49a164cb891d5db02d67f38b055eb725999ee6d39172bbc8414062b7a28",
+      "sourceBytes": 5414,
+      "sourceSha256": "eacc1d1ed1fca12142a0a6899fdb4f5598c5ddd4b020dfe87c3a16d4a0f4b9bf",
       "checks": [
         {
           "name": "single_svg",

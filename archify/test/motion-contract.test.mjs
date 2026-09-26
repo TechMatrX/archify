@@ -6,6 +6,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { compile, compileMotion, MotionContractError } from '../renderers/shared/motion-runtime.mjs';
 import { interpretSequenceMotion, renderSequenceMotionCheckpoint } from '../renderers/sequence/sequence-motion-interpreter.mjs';
+import { interpretWorkflowMotion, renderWorkflowMotionCheckpoint } from '../renderers/workflow/workflow-motion-interpreter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (relative) => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
@@ -13,6 +14,8 @@ const source = () => readJson('examples/async-job-roundtrip.sequence.json');
 const contract = () => readJson('examples/motion/async-job-roundtrip.motion.json');
 const architectureSource = () => readJson('examples/production-deployment.architecture.json');
 const architectureContract = () => readJson('examples/motion/production-deployment.motion.json');
+const workflowSource = () => readJson('examples/release-delivery.workflow.json');
+const workflowContract = () => readJson('examples/motion/release-delivery.motion.json');
 
 test('archify.motion.v1 compiles the Async Job Roundtrip golden against authored ids', () => {
   assert.equal(compileMotion, compile);
@@ -98,6 +101,51 @@ test('pause freezes the inspected deterministic motion state', () => {
   assert.deepEqual(timeline.inspectMotionState(), paused);
   assert.deepEqual(timeline.inspect(), paused);
   assert.deepEqual(timeline.pause(), paused);
+});
+
+test('Workflow interpreter follows exact compiled Release Delivery geometry', () => {
+  const timeline = compile(workflowContract(), workflowSource());
+  assert.equal(timeline.receipt.diagramType, 'workflow');
+  assert.equal(timeline.receipt.beatCount, 10);
+  assert.equal(timeline.receipt.assertionCount, 5);
+  assert.equal(timeline.durationMs, 5000);
+  const frame = interpretWorkflowMotion(workflowSource(), timeline.seek(4250));
+  assert.deepEqual(frame.activeRelationshipIds, ['verify-rollback']);
+  assert.deepEqual(frame.transits, [{
+    id: 'verify-rollback',
+    beatId: 'trigger-rollback',
+    primitive: 'retry',
+    from: 'verify_prod',
+    to: 'rollback',
+    progress: 0.5,
+    point: { x: 692, y: 684.5 },
+    points: [
+      { x: 671, y: 491 },
+      { x: 692, y: 491 },
+      { x: 692, y: 739 },
+      { x: 532, y: 739 },
+    ],
+  }]);
+  const checkpoint = renderWorkflowMotionCheckpoint(workflowSource(), frame);
+  assert.match(checkpoint, /data-motion-time-ms="4250"/);
+  assert.match(checkpoint, /data-motion-relationship="verify-rollback" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-node="rollback" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-transit="verify-rollback"/);
+  assert.doesNotMatch(checkpoint, /setTimeout|requestAnimationFrame|Date\.now/);
+  assert.equal(renderWorkflowMotionCheckpoint(workflowSource(), frame), checkpoint);
+});
+
+test('Workflow motion stays deterministic across authored edge order', () => {
+  const first = compile(workflowContract(), workflowSource());
+  const reordered = workflowSource();
+  reordered.edges.reverse();
+  const second = compile(workflowContract(), reordered);
+  assert.deepEqual(second.receipt, first.receipt);
+  assert.deepEqual(second.seek(4750), first.seek(4750));
+  const restored = interpretWorkflowMotion(reordered, second.seek(4750));
+  assert.deepEqual(restored.transits[0].point, { x: 426, y: 622 });
+  assert.deepEqual(restored.activeNodeIds, ['deploy', 'rollback']);
+  assert.deepEqual(restored.states, ['release.restored']);
 });
 
 test('Production Deployment Ownership proves the Architecture Phase 1 anchor', () => {

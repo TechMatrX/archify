@@ -22,9 +22,11 @@ coordinates or duplicate topology; `compile(contract, ir)` rejects unresolved
 or duplicate semantic IDs before playback. Compiled timelines expose
 `seek(timeMs)`, `pause()`, and `inspectMotionState()`; `inspect()` remains its
 short compatibility alias. Every inspection returns deterministic in-transit
-state for automated acceptance. The Sequence family interpreter materializes
-those snapshots as exact authored-message transit frames. Its checked-in Async
-Job Roundtrip PNG receipt is regenerated with `npm run generate:motion-goldens`.
+state for automated acceptance. Family interpreters consume the same inspected
+state and compiled native geometry: Sequence materializes exact authored-message
+transit frames, while Workflow follows compiled path points for main-path, gate,
+failure, and rollback transit. The checked-in Async Job Roundtrip PNG receipt is
+regenerated with `npm run generate:motion-goldens`.
 
 Every diagram schema requires `schema_version`, `diagram_type`, `meta` (with
 `title`), and its structural arrays — except `segments`, `activations`, and
