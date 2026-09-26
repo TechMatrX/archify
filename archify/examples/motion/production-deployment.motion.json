@@ -1,0 +1,302 @@
+{
+  "motion_version": "archify.motion.v1",
+  "diagram_type": "architecture",
+  "source": {
+    "title": "Production Deployment Ownership",
+    "diagramId": "production-deployment-ownership"
+  },
+  "beats": [
+    {
+      "id": "request-edge",
+      "label": "Traverse the public edge",
+      "startMs": 0,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "clients",
+          "edge"
+        ],
+        "relationships": [
+          "client-edge-https"
+        ]
+      },
+      "state": "request.edge"
+    },
+    {
+      "id": "secure-entry",
+      "label": "Cross the managed security boundary",
+      "startMs": 500,
+      "durationMs": 500,
+      "primitive": "gate",
+      "targets": {
+        "nodes": [
+          "edge",
+          "gateway"
+        ],
+        "relationships": [
+          "edge-gateway-mtls"
+        ]
+      },
+      "state": "request.secured"
+    },
+    {
+      "id": "split-apis",
+      "label": "Fan out to application availability zones",
+      "startMs": 1000,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "gateway",
+          "api_a",
+          "api_b"
+        ],
+        "relationships": [
+          "gateway-api-a-route",
+          "gateway-api-b-route"
+        ]
+      },
+      "state": "request.dispatched"
+    },
+    {
+      "id": "access-state",
+      "label": "Access cache and primary state",
+      "startMs": 1500,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "api_a",
+          "api_b",
+          "redis",
+          "postgres"
+        ],
+        "relationships": [
+          "api-a-cache",
+          "api-b-sql"
+        ]
+      },
+      "state": "state.accessed"
+    },
+    {
+      "id": "dispatch-async",
+      "label": "Publish asynchronous work",
+      "startMs": 2000,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "api_a",
+          "api_b",
+          "events"
+        ],
+        "relationships": [
+          "api-a-publish",
+          "api-b-publish"
+        ]
+      },
+      "state": "async.published"
+    },
+    {
+      "id": "deliver-work",
+      "label": "Deliver work to the worker",
+      "startMs": 2500,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "events",
+          "worker"
+        ],
+        "relationships": [
+          "events-worker-delivery"
+        ]
+      },
+      "state": "async.delivered"
+    },
+    {
+      "id": "replicate-state",
+      "label": "Replicate durable state cross-region",
+      "startMs": 3000,
+      "durationMs": 500,
+      "primitive": "edge-pulse",
+      "targets": {
+        "nodes": [
+          "postgres",
+          "replica"
+        ],
+        "relationships": [
+          "postgres-replica-wal"
+        ]
+      },
+      "state": "state.replicated"
+    },
+    {
+      "id": "emit-evidence",
+      "label": "Emit audit and operational evidence",
+      "startMs": 3500,
+      "durationMs": 500,
+      "primitive": "fanout",
+      "targets": {
+        "nodes": [
+          "worker",
+          "audit",
+          "observability"
+        ],
+        "relationships": [
+          "worker-audit-evidence",
+          "worker-observability-otlp"
+        ]
+      },
+      "state": "evidence.emitted"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "request-edge-transit",
+      "atMs": 250,
+      "activeBeats": [
+        "request-edge"
+      ],
+      "activeNodes": [
+        "clients",
+        "edge"
+      ],
+      "activeRelationships": [
+        "client-edge-https"
+      ],
+      "states": [
+        "request.edge"
+      ]
+    },
+    {
+      "id": "secure-entry-transit",
+      "atMs": 750,
+      "activeBeats": [
+        "secure-entry"
+      ],
+      "activeNodes": [
+        "edge",
+        "gateway"
+      ],
+      "activeRelationships": [
+        "edge-gateway-mtls"
+      ],
+      "states": [
+        "request.secured"
+      ]
+    },
+    {
+      "id": "split-apis-transit",
+      "atMs": 1250,
+      "activeBeats": [
+        "split-apis"
+      ],
+      "activeNodes": [
+        "api_a",
+        "api_b",
+        "gateway"
+      ],
+      "activeRelationships": [
+        "gateway-api-a-route",
+        "gateway-api-b-route"
+      ],
+      "states": [
+        "request.dispatched"
+      ]
+    },
+    {
+      "id": "access-state-transit",
+      "atMs": 1750,
+      "activeBeats": [
+        "access-state"
+      ],
+      "activeNodes": [
+        "api_a",
+        "api_b",
+        "postgres",
+        "redis"
+      ],
+      "activeRelationships": [
+        "api-a-cache",
+        "api-b-sql"
+      ],
+      "states": [
+        "state.accessed"
+      ]
+    },
+    {
+      "id": "dispatch-async-transit",
+      "atMs": 2250,
+      "activeBeats": [
+        "dispatch-async"
+      ],
+      "activeNodes": [
+        "api_a",
+        "api_b",
+        "events"
+      ],
+      "activeRelationships": [
+        "api-a-publish",
+        "api-b-publish"
+      ],
+      "states": [
+        "async.published"
+      ]
+    },
+    {
+      "id": "deliver-work-transit",
+      "atMs": 2750,
+      "activeBeats": [
+        "deliver-work"
+      ],
+      "activeNodes": [
+        "events",
+        "worker"
+      ],
+      "activeRelationships": [
+        "events-worker-delivery"
+      ],
+      "states": [
+        "async.delivered"
+      ]
+    },
+    {
+      "id": "replicate-state-transit",
+      "atMs": 3250,
+      "activeBeats": [
+        "replicate-state"
+      ],
+      "activeNodes": [
+        "postgres",
+        "replica"
+      ],
+      "activeRelationships": [
+        "postgres-replica-wal"
+      ],
+      "states": [
+        "state.replicated"
+      ]
+    },
+    {
+      "id": "emit-evidence-transit",
+      "atMs": 3750,
+      "activeBeats": [
+        "emit-evidence"
+      ],
+      "activeNodes": [
+        "audit",
+        "observability",
+        "worker"
+      ],
+      "activeRelationships": [
+        "worker-audit-evidence",
+        "worker-observability-otlp"
+      ],
+      "states": [
+        "evidence.emitted"
+      ]
+    }
+  ]
+}

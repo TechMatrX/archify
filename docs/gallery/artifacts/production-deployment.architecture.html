@@ -5165,18 +5165,18 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="3" data-composition-frame-label="DR private subnet" x="1026" y="554" width="154" height="106" rx="8" class="c-security-group" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="clients" data-edge-to="edge" data-edge-label="HTTPS" data-edge-key="0" data-composition-points="160,330;230,330" d="M 160 330 L 230 330" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="edge" data-edge-to="gateway" data-edge-label="mTLS" data-edge-key="1" data-composition-points="356,330;430,330" d="M 356 330 L 430 330" class="a-security" data-animate="edge" style="--step:1" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
-        <path data-edge-from="gateway" data-edge-to="api_a" data-edge-label="VPC route" data-edge-key="2" data-composition-points="558,330;594,330;594,226;630,226" d="M 558 330 L 586 330 Q 594 330 594 322 L 594 234 Q 594 226 602 226 L 630 226" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="gateway" data-edge-to="api_b" data-edge-label="VPC route" data-edge-key="3" data-composition-points="558,330;594,330;594,436;630,436" d="M 558 330 L 586 330 Q 594 330 594 338 L 594 428 Q 594 436 602 436 L 630 436" class="a-emphasis" data-animate="edge" style="--step:3" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="api_a" data-edge-to="redis" data-edge-label="cache" data-edge-key="4" data-composition-points="766,226;840,226" d="M 766 226 L 840 226" class="a-default" data-animate="edge" style="--step:4" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="api_b" data-edge-to="postgres" data-edge-label="SQL" data-edge-key="5" data-composition-points="766,436;840,436" d="M 766 436 L 840 436" class="a-default" data-animate="edge" style="--step:5" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="api_a" data-edge-to="events" data-edge-label="publish" data-edge-key="6" data-composition-points="698,195;698,170;1103,170;1103,300" d="M 698 195 L 698 178 Q 698 170 706 170 L 1095 170 Q 1103 170 1103 178 L 1103 300" class="a-dashed" data-animate="edge" style="--step:6" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="api_b" data-edge-to="events" data-edge-key="7" data-composition-points="698,405;698,380;1103,380;1103,360" d="M 698 405 L 698 388 Q 698 380 706 380 L 1095 380 Q 1103 380 1103 372 L 1103 360" class="a-dashed" data-animate="edge" style="--step:7" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="events" data-edge-to="worker" data-edge-key="8" data-composition-points="1166,330;1190,330" d="M 1166 330 L 1190 330" class="a-emphasis" data-animate="edge" style="--step:8" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="postgres" data-edge-to="replica" data-edge-label="cross-region WAL" data-edge-key="9" data-composition-points="966,436;966,522.5;1040,522.5;1040,609" d="M 966 436 L 966 514.5 Q 966 522.5 974 522.5 L 1032 522.5 Q 1040 522.5 1040 530.5 L 1040 609" class="a-security" data-animate="edge" style="--step:9" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
-        <path data-edge-from="worker" data-edge-to="audit" data-edge-label="evidence" data-edge-key="10" data-composition-points="1253,360;1253,450" d="M 1253 360 L 1253 450" class="a-dashed" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="worker" data-edge-to="observability" data-edge-label="OTLP" data-edge-key="11" data-composition-points="1253,300;1253,223.5;1253,223.5;1253,147" d="M 1253 300 L 1253 223.5 L 1253 223.5 L 1253 147" class="a-dashed" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="clients" data-edge-to="edge" data-edge-label="HTTPS" data-edge-key="0" data-edge-id="client-edge-https" data-composition-points="160,330;230,330" d="M 160 330 L 230 330" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="edge" data-edge-to="gateway" data-edge-label="mTLS" data-edge-key="1" data-edge-id="edge-gateway-mtls" data-composition-points="356,330;430,330" d="M 356 330 L 430 330" class="a-security" data-animate="edge" style="--step:1" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="gateway" data-edge-to="api_a" data-edge-label="VPC route" data-edge-key="2" data-edge-id="gateway-api-a-route" data-composition-points="558,330;594,330;594,226;630,226" d="M 558 330 L 586 330 Q 594 330 594 322 L 594 234 Q 594 226 602 226 L 630 226" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="gateway" data-edge-to="api_b" data-edge-label="VPC route" data-edge-key="3" data-edge-id="gateway-api-b-route" data-composition-points="558,330;594,330;594,436;630,436" d="M 558 330 L 586 330 Q 594 330 594 338 L 594 428 Q 594 436 602 436 L 630 436" class="a-emphasis" data-animate="edge" style="--step:3" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="api_a" data-edge-to="redis" data-edge-label="cache" data-edge-key="4" data-edge-id="api-a-cache" data-composition-points="766,226;840,226" d="M 766 226 L 840 226" class="a-default" data-animate="edge" style="--step:4" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="api_b" data-edge-to="postgres" data-edge-label="SQL" data-edge-key="5" data-edge-id="api-b-sql" data-composition-points="766,436;840,436" d="M 766 436 L 840 436" class="a-default" data-animate="edge" style="--step:5" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="api_a" data-edge-to="events" data-edge-label="publish" data-edge-key="6" data-edge-id="api-a-publish" data-composition-points="698,195;698,170;1103,170;1103,300" d="M 698 195 L 698 178 Q 698 170 706 170 L 1095 170 Q 1103 170 1103 178 L 1103 300" class="a-dashed" data-animate="edge" style="--step:6" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="api_b" data-edge-to="events" data-edge-key="7" data-edge-id="api-b-publish" data-composition-points="698,405;698,380;1103,380;1103,360" d="M 698 405 L 698 388 Q 698 380 706 380 L 1095 380 Q 1103 380 1103 372 L 1103 360" class="a-dashed" data-animate="edge" style="--step:7" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="events" data-edge-to="worker" data-edge-key="8" data-edge-id="events-worker-delivery" data-composition-points="1166,330;1190,330" d="M 1166 330 L 1190 330" class="a-emphasis" data-animate="edge" style="--step:8" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="postgres" data-edge-to="replica" data-edge-label="cross-region WAL" data-edge-key="9" data-edge-id="postgres-replica-wal" data-composition-points="966,436;966,522.5;1040,522.5;1040,609" d="M 966 436 L 966 514.5 Q 966 522.5 974 522.5 L 1032 522.5 Q 1040 522.5 1040 530.5 L 1040 609" class="a-security" data-animate="edge" style="--step:9" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="worker" data-edge-to="audit" data-edge-label="evidence" data-edge-key="10" data-edge-id="worker-audit-evidence" data-composition-points="1253,360;1253,450" d="M 1253 360 L 1253 450" class="a-dashed" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="worker" data-edge-to="observability" data-edge-label="OTLP" data-edge-key="11" data-edge-id="worker-observability-otlp" data-composition-points="1253,300;1253,223.5;1253,223.5;1253,147" d="M 1253 300 L 1253 223.5 L 1253 223.5 L 1253 147" class="a-dashed" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
 
         <!-- Components -->
         <g id="node-clients" data-node-id="clients" data-node-label="Customers" tabindex="0" role="button" aria-label="Focus Customers, web + mobile, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="web + mobile" data-node-context="Architecture component">
@@ -5332,45 +5332,45 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <!-- Connection labels -->
-        <g data-detail="context" data-edge-from="clients" data-edge-to="edge" data-edge-label="HTTPS" data-edge-key="0">
+        <g data-detail="context" data-edge-from="clients" data-edge-to="edge" data-edge-label="HTTPS" data-edge-key="0" data-edge-id="client-edge-https">
           <rect x="178" y="310" width="34" height="14" rx="3" class="c-mask"/>
           <text x="195" y="320" class="t-backend" font-size="8" text-anchor="middle">HTTPS</text>
         </g>
-        <g data-detail="context" data-edge-from="edge" data-edge-to="gateway" data-edge-label="mTLS" data-edge-key="1">
+        <g data-detail="context" data-edge-from="edge" data-edge-to="gateway" data-edge-label="mTLS" data-edge-key="1" data-edge-id="edge-gateway-mtls">
           <rect x="378" y="310" width="30" height="14" rx="3" class="c-mask"/>
           <text x="393" y="320" class="t-security" font-size="8" text-anchor="middle">mTLS</text>
         </g>
-        <g data-detail="context" data-edge-from="gateway" data-edge-to="api_a" data-edge-label="VPC route" data-edge-key="2">
+        <g data-detail="context" data-edge-from="gateway" data-edge-to="api_a" data-edge-label="VPC route" data-edge-key="2" data-edge-id="gateway-api-a-route">
           <rect x="567.4" y="265" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
           <text x="594" y="275" class="t-backend" font-size="8" text-anchor="middle">VPC route</text>
         </g>
-        <g data-detail="context" data-edge-from="gateway" data-edge-to="api_b" data-edge-label="VPC route" data-edge-key="3">
+        <g data-detail="context" data-edge-from="gateway" data-edge-to="api_b" data-edge-label="VPC route" data-edge-key="3" data-edge-id="gateway-api-b-route">
           <rect x="567.4" y="375" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
           <text x="594" y="385" class="t-backend" font-size="8" text-anchor="middle">VPC route</text>
         </g>
-        <g data-detail="context" data-edge-from="api_a" data-edge-to="redis" data-edge-label="cache" data-edge-key="4">
+        <g data-detail="context" data-edge-from="api_a" data-edge-to="redis" data-edge-label="cache" data-edge-key="4" data-edge-id="api-a-cache">
           <rect x="786" y="206" width="34" height="14" rx="3" class="c-mask"/>
           <text x="803" y="216" class="t-muted" font-size="8" text-anchor="middle">cache</text>
         </g>
-        <g data-detail="context" data-edge-from="api_b" data-edge-to="postgres" data-edge-label="SQL" data-edge-key="5">
+        <g data-detail="context" data-edge-from="api_b" data-edge-to="postgres" data-edge-label="SQL" data-edge-key="5" data-edge-id="api-b-sql">
           <rect x="788" y="416" width="30" height="14" rx="3" class="c-mask"/>
           <text x="803" y="426" class="t-muted" font-size="8" text-anchor="middle">SQL</text>
         </g>
-        <g data-detail="context" data-edge-from="api_a" data-edge-to="events" data-edge-label="publish" data-edge-key="6">
+        <g data-detail="context" data-edge-from="api_a" data-edge-to="events" data-edge-label="publish" data-edge-key="6" data-edge-id="api-a-publish">
           <rect x="878.7" y="150" width="43.6" height="14" rx="3" class="c-mask"/>
           <text x="900.5" y="160" class="t-messagebus" font-size="8" text-anchor="middle">publish</text>
         </g>
 
 
-        <g data-detail="context" data-edge-from="postgres" data-edge-to="replica" data-edge-label="cross-region WAL" data-edge-key="9">
+        <g data-detail="context" data-edge-from="postgres" data-edge-to="replica" data-edge-label="cross-region WAL" data-edge-key="9" data-edge-id="postgres-replica-wal">
           <rect x="959.6" y="519" width="86.8" height="14" rx="3" class="c-mask"/>
           <text x="1003" y="529" class="t-security" font-size="8" text-anchor="middle">cross-region WAL</text>
         </g>
-        <g data-detail="context" data-edge-from="worker" data-edge-to="audit" data-edge-label="evidence" data-edge-key="10">
+        <g data-detail="context" data-edge-from="worker" data-edge-to="audit" data-edge-label="evidence" data-edge-key="10" data-edge-id="worker-audit-evidence">
           <rect x="1228.8" y="398" width="48.4" height="14" rx="3" class="c-mask"/>
           <text x="1253" y="408" class="t-messagebus" font-size="8" text-anchor="middle">evidence</text>
         </g>
-        <g data-detail="context" data-edge-from="worker" data-edge-to="observability" data-edge-label="OTLP" data-edge-key="11">
+        <g data-detail="context" data-edge-from="worker" data-edge-to="observability" data-edge-label="OTLP" data-edge-key="11" data-edge-id="worker-observability-otlp">
           <rect x="1238" y="203.5" width="30" height="14" rx="3" class="c-mask"/>
           <text x="1253" y="213.5" class="t-messagebus" font-size="8" text-anchor="middle">OTLP</text>
         </g>

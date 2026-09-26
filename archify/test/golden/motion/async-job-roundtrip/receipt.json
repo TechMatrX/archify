@@ -1,0 +1,114 @@
+{
+  "schema": "archify.motion-golden.v1",
+  "source": "examples/async-job-roundtrip.sequence.json",
+  "contract": "examples/motion/async-job-roundtrip.motion.json",
+  "contractSha256": "65b09d88dc7ec1c573f6fee4c3b03e3035fdba4db9caa81f3ede78cdf0138e58",
+  "irSemanticSha256": "9f8ce37b2b4452dfcae5c5513fce960bfd8116dd601265c9af73628981cc6c44",
+  "captures": [
+    {
+      "name": "request",
+      "timeMs": 250,
+      "file": "request.png",
+      "width": 820,
+      "height": 920,
+      "pngSha256": "8aed2cff5e81717a70cbdd985145e4fde8ea9de5076314a4e12f768564d3ae8b",
+      "activeBeatIds": [
+        "request"
+      ],
+      "activeNodeIds": [
+        "api",
+        "client"
+      ],
+      "activeRelationshipIds": [
+        "submit-job"
+      ],
+      "states": [
+        "request.submitted"
+      ]
+    },
+    {
+      "name": "queued",
+      "timeMs": 750,
+      "file": "queued.png",
+      "width": 820,
+      "height": 920,
+      "pngSha256": "d9e994185a29f9c2c84f48d2d69cb676ceae5e77ad596d0d9389d72c9ebfcbd4",
+      "activeBeatIds": [
+        "enqueue"
+      ],
+      "activeNodeIds": [
+        "api",
+        "queue"
+      ],
+      "activeRelationshipIds": [
+        "enqueue-job"
+      ],
+      "states": [
+        "job.queued"
+      ]
+    },
+    {
+      "name": "processing",
+      "timeMs": 2250,
+      "file": "processing.png",
+      "width": 820,
+      "height": 920,
+      "pngSha256": "5bbc2fc639e69909e25f05e17081913fe73d6c84143eb1ce036c57554b56229e",
+      "activeBeatIds": [
+        "perform"
+      ],
+      "activeNodeIds": [
+        "provider",
+        "worker"
+      ],
+      "activeRelationshipIds": [
+        "perform-work"
+      ],
+      "states": [
+        "job.processing"
+      ]
+    },
+    {
+      "name": "callback",
+      "timeMs": 4750,
+      "file": "callback.png",
+      "width": 820,
+      "height": 920,
+      "pngSha256": "1a0f36775c2c49e2d4f7b65fd46fe6d90863565966cab1c5141fc9526efd884a",
+      "activeBeatIds": [
+        "callback"
+      ],
+      "activeNodeIds": [
+        "client",
+        "notify"
+      ],
+      "activeRelationshipIds": [
+        "deliver-webhook"
+      ],
+      "states": [
+        "notification.delivered"
+      ]
+    },
+    {
+      "name": "reconciled",
+      "timeMs": 6750,
+      "file": "reconciled.png",
+      "width": 820,
+      "height": 920,
+      "pngSha256": "e9d443b3ecae345e1d67567b4d33a9aaaadda9ef58093002d443de4b2e18828f",
+      "activeBeatIds": [
+        "final"
+      ],
+      "activeNodeIds": [
+        "api",
+        "client"
+      ],
+      "activeRelationshipIds": [
+        "return-final-result"
+      ],
+      "states": [
+        "reconcile.converged"
+      ]
+    }
+  ]
+}

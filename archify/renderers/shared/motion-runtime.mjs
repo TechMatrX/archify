@@ -54,12 +54,14 @@ function indexed(items, subject, collection) {
 
 function createInspector(beats, durationMs) {
   let timeMs = 0;
-  const inspectAt = (requestedMs) => {
+  let paused = false;
+  const inspectAt = (requestedMs, isPaused = paused) => {
     const boundedMs = Math.max(0, Math.min(durationMs, requestedMs));
     const active = beats.filter((beat) => boundedMs >= beat.startMs && boundedMs < beat.endMs);
     return Object.freeze({
       timeMs: boundedMs,
       durationMs,
+      paused: isPaused,
       activeBeatIds: active.map((beat) => beat.id),
       activeNodeIds: sorted(active.flatMap((beat) => beat.targets.nodes)),
       activeRelationshipIds: sorted(active.flatMap((beat) => beat.targets.relationships)),
@@ -75,13 +77,22 @@ function createInspector(beats, durationMs) {
   return {
     seek(requestedMs) {
       if (!Number.isFinite(requestedMs)) fail('invalid-seek', 'seek time must be finite');
-      timeMs = requestedMs;
+      timeMs = Math.max(0, Math.min(durationMs, requestedMs));
+      return inspectAt(timeMs);
+    },
+    pause() {
+      paused = true;
+      return inspectAt(timeMs);
+    },
+    inspectMotionState() {
       return inspectAt(timeMs);
     },
     inspect() {
       return inspectAt(timeMs);
     },
-    inspectAt,
+    inspectAt(requestedMs) {
+      return inspectAt(requestedMs, false);
+    },
   };
 }
 
@@ -150,7 +161,15 @@ export function compile(contract, ir) {
       relationships: [...relationships.values()].map(({ id, from, to }) => ({ id, from, to })).sort((a, b) => a.id.localeCompare(b.id)),
     }),
   });
-  return Object.freeze({ beats: Object.freeze(beats), durationMs, receipt, seek: inspector.seek, inspect: inspector.inspect });
+  return Object.freeze({
+    beats: Object.freeze(beats),
+    durationMs,
+    receipt,
+    seek: inspector.seek,
+    pause: inspector.pause,
+    inspectMotionState: inspector.inspectMotionState,
+    inspect: inspector.inspect,
+  });
 }
 
 export const compileMotion = compile;
