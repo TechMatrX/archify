@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { compile, compileMotion, MotionContractError } from '../renderers/shared/motion-runtime.mjs';
 import { interpretSequenceMotion, renderSequenceMotionCheckpoint } from '../renderers/sequence/sequence-motion-interpreter.mjs';
 import { interpretWorkflowMotion, renderWorkflowMotionCheckpoint } from '../renderers/workflow/workflow-motion-interpreter.mjs';
+import { interpretLifecycleMotion, renderLifecycleMotionCheckpoint } from '../renderers/lifecycle/lifecycle-motion-interpreter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (relative) => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'));
@@ -16,6 +17,8 @@ const architectureSource = () => readJson('examples/production-deployment.archit
 const architectureContract = () => readJson('examples/motion/production-deployment.motion.json');
 const workflowSource = () => readJson('examples/release-delivery.workflow.json');
 const workflowContract = () => readJson('examples/motion/release-delivery.motion.json');
+const lifecycleSource = () => readJson('examples/deployment-release.lifecycle.json');
+const lifecycleContract = () => readJson('examples/motion/deployment-release.motion.json');
 
 test('archify.motion.v1 compiles the Async Job Roundtrip golden against authored ids', () => {
   assert.equal(compileMotion, compile);
@@ -146,6 +149,48 @@ test('Workflow motion stays deterministic across authored edge order', () => {
   assert.deepEqual(restored.transits[0].point, { x: 426, y: 622 });
   assert.deepEqual(restored.activeNodeIds, ['deploy', 'rollback']);
   assert.deepEqual(restored.states, ['release.restored']);
+});
+
+test('Lifecycle interpreter materializes exact Deployment Release transitions', () => {
+  const timeline = compile(lifecycleContract(), lifecycleSource());
+  assert.equal(timeline.receipt.diagramType, 'lifecycle');
+  assert.equal(timeline.receipt.beatCount, 11);
+  assert.equal(timeline.receipt.assertionCount, 6);
+  assert.equal(timeline.durationMs, 5000);
+  const frame = interpretLifecycleMotion(lifecycleSource(), timeline.seek(4750));
+  assert.deepEqual(frame.activeRelationshipIds, ['paused-rolled-back']);
+  assert.deepEqual(frame.activeNodeIds, ['paused', 'rolled_back']);
+  assert.deepEqual(frame.states, ['release.restored']);
+  assert.deepEqual(frame.transits, [{
+    id: 'paused-rolled-back',
+    beatId: 'restore-service',
+    primitive: 'retry',
+    from: 'paused',
+    to: 'rolled_back',
+    progress: 0.5,
+    point: { x: 710, y: 393 },
+    points: [{ x: 710, y: 336 }, { x: 710, y: 450 }],
+  }]);
+  const checkpoint = renderLifecycleMotionCheckpoint(lifecycleSource(), frame);
+  assert.match(checkpoint, /data-motion-time-ms="4750"/);
+  assert.match(checkpoint, /data-motion-relationship="paused-rolled-back" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-node="rolled_back" data-motion-active="true"/);
+  assert.match(checkpoint, /data-motion-transit="paused-rolled-back"/);
+  assert.doesNotMatch(checkpoint, /setTimeout|requestAnimationFrame|Date\.now/);
+  assert.equal(renderLifecycleMotionCheckpoint(lifecycleSource(), frame), checkpoint);
+});
+
+test('Lifecycle terminal branches are exclusive and deterministic across transition order', () => {
+  const first = compile(lifecycleContract(), lifecycleSource());
+  const reordered = lifecycleSource();
+  reordered.transitions.reverse();
+  const second = compile(lifecycleContract(), reordered);
+  assert.deepEqual(second.receipt, first.receipt);
+  assert.deepEqual(second.seek(3350), first.seek(3350));
+  assert.deepEqual(first.seek(3350).states, ['release.failed']);
+  assert.deepEqual(first.seek(4750).states, ['release.restored']);
+  assert.notDeepEqual(first.seek(3350).activeNodeIds, first.seek(4750).activeNodeIds);
+  assert.deepEqual(interpretLifecycleMotion(reordered, second.seek(4250)).transits[0].point, { x: 710, y: 233 });
 });
 
 test('Production Deployment Ownership proves the Architecture Phase 1 anchor', () => {

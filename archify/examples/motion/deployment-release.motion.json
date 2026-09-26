@@ -1,0 +1,29 @@
+{
+  "motion_version": "archify.motion.v1",
+  "diagram_type": "lifecycle",
+  "source": {
+    "title": "Deployment Release Lifecycle",
+    "diagramId": "deployment-release"
+  },
+  "beats": [
+    { "id": "queue-release", "label": "Accept the release object", "startMs": 0, "durationMs": 400, "primitive": "node-hold", "targets": { "nodes": ["queued"], "relationships": [] }, "state": "release.queued" },
+    { "id": "build-image", "label": "Build the immutable image", "startMs": 400, "durationMs": 400, "primitive": "node-hold", "targets": { "nodes": ["building"], "relationships": [] }, "state": "release.building" },
+    { "id": "verify-release", "label": "Run tests and policy", "startMs": 800, "durationMs": 400, "primitive": "gate", "targets": { "nodes": ["verifying"], "relationships": [] }, "state": "release.verifying" },
+    { "id": "await-approval", "label": "Pause for release-owner approval", "startMs": 1200, "durationMs": 500, "primitive": "gate", "targets": { "nodes": ["verifying", "approval"], "relationships": ["verifying-approval"] }, "state": "release.awaiting_approval" },
+    { "id": "cancel-release", "label": "Terminate when approval is denied", "startMs": 1700, "durationMs": 500, "primitive": "gate", "targets": { "nodes": ["approval", "cancelled"], "relationships": ["approval-cancelled"] }, "state": "release.cancelled" },
+    { "id": "ready-release", "label": "Mark promotion ready", "startMs": 2200, "durationMs": 400, "primitive": "node-hold", "targets": { "nodes": ["ready"], "relationships": [] }, "state": "release.ready" },
+    { "id": "rollback-before-live", "label": "Start rollback before promotion completes", "startMs": 2600, "durationMs": 500, "primitive": "retry", "targets": { "nodes": ["ready", "rollback"], "relationships": ["ready-rollback"] }, "state": "release.rollback_started" },
+    { "id": "rollback-failure", "label": "Finish with a failed rollback", "startMs": 3100, "durationMs": 500, "primitive": "retry", "targets": { "nodes": ["rollback", "failed"], "relationships": ["rollback-failed"] }, "state": "release.failed" },
+    { "id": "promote-live", "label": "Promote a healthy release", "startMs": 3600, "durationMs": 400, "primitive": "node-hold", "targets": { "nodes": ["live"], "relationships": [] }, "state": "release.live" },
+    { "id": "pause-on-health", "label": "Pause on SLO regression", "startMs": 4000, "durationMs": 500, "primitive": "gate", "targets": { "nodes": ["live", "paused"], "relationships": ["live-paused"] }, "state": "release.health_paused" },
+    { "id": "restore-service", "label": "Complete rollback with service restored", "startMs": 4500, "durationMs": 500, "primitive": "retry", "targets": { "nodes": ["paused", "rolled_back"], "relationships": ["paused-rolled-back"] }, "state": "release.restored" }
+  ],
+  "assertions": [
+    { "id": "approval-in-transit", "atMs": 1450, "activeBeats": ["await-approval"], "activeNodes": ["approval", "verifying"], "activeRelationships": ["verifying-approval"], "states": ["release.awaiting_approval"] },
+    { "id": "cancelled-in-transit", "atMs": 1950, "activeBeats": ["cancel-release"], "activeNodes": ["approval", "cancelled"], "activeRelationships": ["approval-cancelled"], "states": ["release.cancelled"] },
+    { "id": "rollback-in-transit", "atMs": 2850, "activeBeats": ["rollback-before-live"], "activeNodes": ["ready", "rollback"], "activeRelationships": ["ready-rollback"], "states": ["release.rollback_started"] },
+    { "id": "failed-terminal-in-transit", "atMs": 3350, "activeBeats": ["rollback-failure"], "activeNodes": ["failed", "rollback"], "activeRelationships": ["rollback-failed"], "states": ["release.failed"] },
+    { "id": "health-pause-in-transit", "atMs": 4250, "activeBeats": ["pause-on-health"], "activeNodes": ["live", "paused"], "activeRelationships": ["live-paused"], "states": ["release.health_paused"] },
+    { "id": "restored-terminal-in-transit", "atMs": 4750, "activeBeats": ["restore-service"], "activeNodes": ["paused", "rolled_back"], "activeRelationships": ["paused-rolled-back"], "states": ["release.restored"] }
+  ]
+}

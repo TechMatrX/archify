@@ -34,12 +34,12 @@
     { "id": "rolled_back", "type": "success", "label": "Rolled Back", "sublabel": "service restored", "lane": "terminal", "col": 2, "tag": "terminal" }
   ],
   "transitions": [
-    { "from": "verifying", "to": "approval", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
-    { "from": "approval", "to": "cancelled", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
-    { "from": "ready", "to": "rollback", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
-    { "from": "rollback", "to": "failed", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
-    { "from": "live", "to": "paused", "variant": "dashed", "route": "straight", "fromSide": "bottom", "toSide": "top" },
-    { "from": "paused", "to": "rolled_back", "variant": "emphasis", "route": "straight", "fromSide": "bottom", "toSide": "top" }
+    { "id": "verifying-approval", "from": "verifying", "to": "approval", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
+    { "id": "approval-cancelled", "from": "approval", "to": "cancelled", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
+    { "id": "ready-rollback", "from": "ready", "to": "rollback", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
+    { "id": "rollback-failed", "from": "rollback", "to": "failed", "variant": "security", "route": "straight", "fromSide": "bottom", "toSide": "top" },
+    { "id": "live-paused", "from": "live", "to": "paused", "variant": "dashed", "route": "straight", "fromSide": "bottom", "toSide": "top" },
+    { "id": "paused-rolled-back", "from": "paused", "to": "rolled_back", "variant": "emphasis", "route": "straight", "fromSide": "bottom", "toSide": "top" }
   ],
   "cards": [
     { "dot": "cyan", "title": "Promotion Rail", "items": ["The release object moves through five ordered phases", "Verification and approval remain distinct states", "Live means production health is currently proven"] },
